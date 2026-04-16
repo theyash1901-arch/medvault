@@ -9,6 +9,7 @@ const LoginScreen = lazy(() => import('./screens/auth/LoginScreen'));
 const SignupScreen = lazy(() => import('./screens/auth/SignupScreen'));
 const WelcomeScreen = lazy(() => import('./screens/auth/WelcomeScreen'));
 const RoleSelectionScreen = lazy(() => import('./screens/auth/RoleSelectionScreen'));
+const OnboardingScreen = lazy(() => import('./screens/auth/OnboardingScreen'));
 const PatientHome = lazy(() => import('./screens/patient/PatientHome'));
 const ProfileScreen = lazy(() => import('./screens/patient/ProfileScreen'));
 const ReportsScreen = lazy(() => import('./screens/patient/ReportsScreen'));
@@ -109,6 +110,16 @@ function AppRoutes() {
       <Routes>
         <Route path="/select-role" element={<RoleSelectionScreen />} />
         <Route path="*" element={<Navigate to="/select-role" replace />} />
+      </Routes>
+    );
+  }
+
+  // Profile exists but details not filled in yet
+  if (!profile.full_name) {
+    return (
+      <Routes>
+        <Route path="/onboarding" element={<OnboardingScreen />} />
+        <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
   }
