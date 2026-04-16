@@ -80,6 +80,7 @@ function AppRoutes() {
       <div className="loading-screen">
         <div className="spinner"></div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading MedVault...</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.65rem', opacity: 0.4, marginTop: 8 }}>v2.1</p>
       </div>
     );
   }

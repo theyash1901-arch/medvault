@@ -53,18 +53,43 @@ export function AuthProvider({ children }) {
 
   const fetchProfile = async (userId) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error);
+      // Use raw fetch to bypass Supabase JS client hanging bug
+      const session = (await supabase.auth.getSession())?.data?.session;
+      if (!session) {
+        setProfile(null);
+        setLoading(false);
+        return;
       }
-      setProfile(data || null);
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const rows = await response.json();
+        setProfile(rows?.[0] || null);
+      } else {
+        console.error('Profile fetch error:', response.status);
+        setProfile(null);
+      }
     } catch (err) {
       console.error('Profile fetch failed:', err);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
