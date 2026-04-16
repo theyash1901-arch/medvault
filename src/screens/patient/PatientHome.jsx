@@ -56,7 +56,7 @@ export default function PatientHome() {
             <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}>
               <div style={{
                 width: 48, height: 48, borderRadius: 'var(--radius-md)',
-                background: 'linear-gradient(135deg, var(--primary-glow), rgba(56, 189, 248, 0.1))',
+                background: 'rgba(10, 132, 255, 0.08)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
                 <FiMaximize style={{ color: 'var(--primary-light)', width: 22, height: 22 }} />
