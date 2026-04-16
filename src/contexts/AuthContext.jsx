@@ -71,13 +71,21 @@ export function AuthProvider({ children }) {
   };
 
   const signUp = async (email, password) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      return { data, error };
+    } catch (err) {
+      return { data: null, error: { message: err.message || 'Signup failed' } };
+    }
   };
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      return { data, error };
+    } catch (err) {
+      return { data: null, error: { message: err.message || 'Signin failed' } };
+    }
   };
 
   const signOut = async () => {
@@ -90,16 +98,20 @@ export function AuthProvider({ children }) {
   };
 
   const createProfile = async (profileData) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({ id: user.id, ...profileData })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, ...profileData })
+        .select()
+        .single();
 
-    if (!error) {
-      setProfile(data);
+      if (!error) {
+        setProfile(data);
+      }
+      return { data, error };
+    } catch (err) {
+      return { data: null, error: { message: err.message || 'Failed to create profile' } };
     }
-    return { data, error };
   };
 
   const value = {

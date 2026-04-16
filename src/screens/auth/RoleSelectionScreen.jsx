@@ -13,15 +13,20 @@ export default function RoleSelectionScreen() {
     setLoading(true);
     setError('');
 
-    const { error: profileError } = await createProfile({
-      role: selectedRole,
-      full_name: '',
-    });
+    try {
+      const { error: profileError } = await createProfile({
+        role: selectedRole,
+        full_name: '',
+      });
 
-    if (profileError) {
-      setError(profileError.message);
+      if (profileError) {
+        setError(profileError.message);
+      }
+    } catch (err) {
+      setError(err.message || 'Error configuring role.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
