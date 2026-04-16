@@ -11,6 +11,7 @@ import QRScreen from './screens/patient/QRScreen';
 import AccessControlScreen from './screens/patient/AccessControlScreen';
 import AIChatScreen from './screens/patient/AIChatScreen';
 import DoctorHome from './screens/doctor/DoctorHome';
+import DoctorProfileScreen from './screens/doctor/DoctorProfileScreen';
 import BottomNav from './components/BottomNav';
 import OfflineBanner from './components/OfflineBanner';
 
@@ -107,6 +108,7 @@ function AppRoutes() {
         <OfflineBanner />
         <Routes>
           <Route path="/doctor" element={<DoctorHome />} />
+          <Route path="/doctor/profile" element={<DoctorProfileScreen />} />
           <Route path="*" element={<Navigate to="/doctor" replace />} />
         </Routes>
         <BottomNav role="doctor" />

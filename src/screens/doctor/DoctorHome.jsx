@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { FiSearch, FiMaximize, FiUser, FiFileText, FiAlertTriangle, FiHeart } from 'react-icons/fi';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 export default function DoctorHome() {
   const { profile } = useAuth();
@@ -15,41 +15,6 @@ export default function DoctorHome() {
   const [error, setError] = useState('');
 
   const displayName = profile?.full_name || 'Doctor';
-
-  useEffect(() => {
-    if (!scanning) return;
-
-    try {
-      const scanner = new Html5QrcodeScanner(
-        "qr-reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        /* verbose= */ false
-      );
-
-      scanner.render(
-        (text) => {
-          scanner.clear();
-          setScanning(false);
-          handleQRScan(text);
-        },
-        (err) => {
-          // ignore background scan errors 
-        }
-      );
-
-      return () => {
-        try {
-          scanner.clear();
-        } catch (e) {
-          console.error(e);
-        }
-      };
-    } catch (err) {
-      console.error("Scanner failed:", err);
-      setError("Could not load camera scanner. Check camera permissions.");
-      setScanning(false);
-    }
-  }, [scanning]);
 
   const searchPatient = async (e) => {
     e?.preventDefault();
@@ -130,9 +95,10 @@ export default function DoctorHome() {
   };
 
   // Handle QR scan result
-  const handleQRScan = (text) => {
+  const handleQRScan = (result) => {
+    if (!result || !result.length) return;
     try {
-      const data = JSON.parse(text);
+      const data = JSON.parse(result[0].rawValue);
       if (data._t !== 'medvault') {
         setError('Invalid MedVault QR code');
         return;
@@ -140,7 +106,7 @@ export default function DoctorHome() {
       setScannedData(data);
       setScanning(false);
     } catch {
-      setError('Could not read QR code');
+      setError('Could not parse QR code data.');
     }
   };
 
@@ -192,10 +158,12 @@ export default function DoctorHome() {
             </button>
           ) : (
             <div style={{ position: 'relative' }}>
-              <div id="qr-reader" style={{ width: '100%', maxWidth: '400px', margin: '0 auto', overflow: 'hidden', borderRadius: '12px' }}></div>
+              <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', overflow: 'hidden', borderRadius: '12px' }}>
+                <Scanner onScan={handleQRScan} />
+              </div>
               <button 
                 className="btn btn-outline btn-sm" 
-                style={{ marginTop: 12 }}
+                style={{ marginTop: 16 }}
                 onClick={() => setScanning(false)}
               >
                 Cancel Scan

@@ -17,17 +17,18 @@ export default function BottomNav({ role }) {
   if (role === 'doctor') {
     return (
       <nav className="bottom-nav">
-        <div className="bottom-nav-inner">
+        <div className="bottom-nav-inner" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
           <NavItem
             icon={<FiHome />}
-            label="Home"
+            label="Dashboard"
             active={location.pathname === '/doctor'}
             onClick={() => navigate('/doctor')}
           />
           <NavItem
-            icon={<FiLogOut />}
-            label="Sign Out"
-            onClick={handleSignOut}
+            icon={<FiUser />}
+            label="Profile"
+            active={location.pathname === '/doctor/profile'}
+            onClick={() => navigate('/doctor/profile')}
           />
         </div>
       </nav>
