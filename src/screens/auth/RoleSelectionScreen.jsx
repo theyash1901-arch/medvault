@@ -7,22 +7,27 @@ export default function RoleSelectionScreen() {
   const [selectedRole, setSelectedRole] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [debugLog, setDebugLog] = useState('');
 
   const handleContinue = async () => {
     if (!selectedRole) return;
     setLoading(true);
     setError('');
+    setDebugLog('Starting profile creation...');
 
     try {
-      const { error: profileError } = await createProfile({
+      const result = await createProfile({
         role: selectedRole,
         full_name: '',
       });
 
-      if (profileError) {
-        setError(profileError.message || JSON.stringify(profileError));
+      setDebugLog(`Result: ${JSON.stringify(result).slice(0, 500)}`);
+
+      if (result?.error) {
+        setError(result.error.message || JSON.stringify(result.error));
       }
     } catch (err) {
+      setDebugLog(`Exception: ${err.message}`);
       setError(err.message || 'Error configuring role.');
     } finally {
       setLoading(false);
@@ -41,8 +46,14 @@ export default function RoleSelectionScreen() {
         </div>
 
         {error && (
-          <div className="alert alert-error" style={{ marginBottom: 16 }}>
+          <div className="alert alert-error" style={{ marginBottom: 16, wordBreak: 'break-all' }}>
             {error}
+          </div>
+        )}
+
+        {debugLog && (
+          <div style={{ marginBottom: 16, padding: 12, background: 'rgba(255,255,255,0.05)', borderRadius: 8, fontSize: '0.7rem', color: '#aaa', wordBreak: 'break-all' }}>
+            DEBUG: {debugLog}
           </div>
         )}
 
