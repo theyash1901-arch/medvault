@@ -1,18 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
+import { MockSupabaseClient } from './mockSupabase';
 
 const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Check if real credentials are provided
-export const isSupabaseConfigured = !!(
+export const isRealSupabaseConfigured = !!(
   rawUrl &&
   rawKey &&
   rawUrl.startsWith('https://') &&
   rawKey.startsWith('ey')
 );
 
-// Always use a valid HTTPS URL so createClient doesn't crash
-const supabaseUrl = isSupabaseConfigured ? rawUrl : 'https://placeholder.supabase.co';
-const supabaseAnonKey = isSupabaseConfigured ? rawKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MjcwODc2MjAsImV4cCI6MTk0MjY2MzYyMH0.placeholder';
+// We force isSupabaseConfigured to true so the app bypasses the SetupScreen
+// If real keys are missing, it falls back to LocalStorage Mock Mode.
+export const isSupabaseConfigured = true;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use real client if keys exist, otherwise mock client
+export const supabase = isRealSupabaseConfigured 
+  ? createClient(rawUrl, rawKey) 
+  : new MockSupabaseClient();
