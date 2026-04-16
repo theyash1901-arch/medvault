@@ -10,14 +10,14 @@ export default function BottomNav({ role }) {
   const handleSignOut = async () => {
     if (confirm('Sign out of MedVault?')) {
       await signOut();
-      navigate('/login');
+      navigate('/');
     }
   };
 
   if (role === 'doctor') {
     return (
       <nav className="bottom-nav">
-        <div className="bottom-nav-inner" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        <div className="bottom-nav-inner" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
           <NavItem
             icon={<FiHome />}
             label="Dashboard"
@@ -29,6 +29,12 @@ export default function BottomNav({ role }) {
             label="Profile"
             active={location.pathname === '/doctor/profile'}
             onClick={() => navigate('/doctor/profile')}
+          />
+          <NavItem
+            icon={<FiLogOut />}
+            label="Logout"
+            active={false}
+            onClick={handleSignOut}
           />
         </div>
       </nav>
@@ -63,16 +69,16 @@ export default function BottomNav({ role }) {
           onClick={() => navigate('/patient/chat')}
         />
         <NavItem
-          icon={<FiHeart />}
-          label="Health"
-          active={location.pathname === '/patient/summary'}
-          onClick={() => navigate('/patient/summary')}
-        />
-        <NavItem
           icon={<FiUser />}
           label="Profile"
           active={location.pathname === '/patient/profile'}
           onClick={() => navigate('/patient/profile')}
+        />
+        <NavItem
+          icon={<FiLogOut />}
+          label="Logout"
+          active={false}
+          onClick={handleSignOut}
         />
       </div>
     </nav>
