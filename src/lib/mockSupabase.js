@@ -1,5 +1,5 @@
 // src/lib/mockSupabase.js
-const delay = (ms) => new Promise(res => setTimeout(res, ms));
+const delay = (ms) => Promise.resolve();
 
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -27,7 +27,7 @@ class MockQueryBuilder {
   }
 
   select(q = '*') { 
-    this.queryType = 'select'; 
+    if (!this.queryType) this.queryType = 'select'; 
     this.selectQuery = q; 
     return this; 
   }
