@@ -13,6 +13,12 @@ export default function RoleSelectionScreen() {
     setLoading(true);
     setError('');
 
+    // Hard fallback to prevent infinite spinner if SDK locks up
+    const timeoutHandle = setTimeout(() => {
+      setLoading(false);
+      setError('Connection timed out. Check if Vercel finished deploying your latest build!');
+    }, 7000);
+
     try {
       const { error: profileError } = await createProfile({
         role: selectedRole,
@@ -20,11 +26,12 @@ export default function RoleSelectionScreen() {
       });
 
       if (profileError) {
-        setError(profileError.message);
+        setError(profileError.message || JSON.stringify(profileError));
       }
     } catch (err) {
       setError(err.message || 'Error configuring role.');
     } finally {
+      clearTimeout(timeoutHandle);
       setLoading(false);
     }
   };
