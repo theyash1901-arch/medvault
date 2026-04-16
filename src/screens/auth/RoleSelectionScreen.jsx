@@ -17,7 +17,7 @@ export default function RoleSelectionScreen() {
     const timeoutHandle = setTimeout(() => {
       setLoading(false);
       setError('Connection timed out. Check if Vercel finished deploying your latest build!');
-    }, 7000);
+    }, 3000);
 
     try {
       const { error: profileError } = await createProfile({
