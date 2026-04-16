@@ -49,9 +49,9 @@ export default function AIChatScreen() {
   };
 
   return (
-    <div className="page" style={{ height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column', paddingBottom: 0 }}>
+    <div className="page" style={{ height: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: 0 }}>
       {/* Header */}
-      <div style={{ padding: '20px 16px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ padding: '16px 16px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <h1 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: 8 }}>
           <FiCpu color="var(--primary)" /> MedVault AI
         </h1>
@@ -63,26 +63,26 @@ export default function AIChatScreen() {
         {messages.map((msg, idx) => (
           <div key={idx} style={{
             display: 'flex',
-            gap: 12,
+            gap: 10,
             flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
           }}>
             <div style={{
-              width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+              width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
               background: msg.role === 'user' ? 'var(--primary)' : 'var(--accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
             }}>
-              {msg.role === 'user' ? <FiUser size={16} /> : <FiCpu size={16} />}
+              {msg.role === 'user' ? <FiUser size={14} /> : <FiCpu size={14} />}
             </div>
             
             <div style={{
               background: msg.role === 'user' ? 'var(--primary)' : 'var(--bg-elevated)',
               color: msg.role === 'user' ? 'white' : 'var(--text-primary)',
-              padding: '12px 16px',
+              padding: '10px 14px',
               borderRadius: '16px',
               borderTopRightRadius: msg.role === 'user' ? '4px' : '16px',
               borderTopLeftRadius: msg.role === 'ai' ? '4px' : '16px',
               maxWidth: '80%',
-              fontSize: '0.9rem',
+              fontSize: '0.85rem',
               lineHeight: 1.5
             }}>
               {msg.role === 'user' ? (
@@ -96,11 +96,11 @@ export default function AIChatScreen() {
           </div>
         ))}
         {loading && (
-          <div style={{ display: 'flex', gap: 12 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-              <FiCpu size={16} />
+          <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+              <FiCpu size={14} />
             </div>
-            <div style={{ background: 'var(--bg-elevated)', padding: '12px 16px', borderRadius: '16px', borderTopLeftRadius: '4px' }}>
+            <div style={{ background: 'var(--bg-elevated)', padding: '10px 14px', borderRadius: '16px', borderTopLeftRadius: '4px' }}>
               <span className="spinner" style={{ width: 16, height: 16 }}></span>
             </div>
           </div>
@@ -108,12 +108,12 @@ export default function AIChatScreen() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div style={{ padding: '16px', background: 'var(--bg-elevated)', borderTop: '1px solid var(--border)' }}>
+      {/* Input Area - positioned above bottom nav */}
+      <div style={{ padding: '12px 16px', paddingBottom: 'calc(12px + 90px)', background: 'var(--bg-elevated)', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
         <form onSubmit={handleSend} style={{ display: 'flex', gap: 8 }}>
           <input
             className="form-input"
-            style={{ flex: 1, borderRadius: '24px', paddingLeft: 16 }}
+            style={{ flex: 1, borderRadius: '24px', paddingLeft: 16, fontSize: '0.9rem' }}
             placeholder="Ask about your health..."
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -122,7 +122,7 @@ export default function AIChatScreen() {
           <button 
             type="submit" 
             className="btn btn-primary"
-            style={{ borderRadius: '50%', width: 44, height: 44, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ borderRadius: '50%', width: 44, height: 44, minWidth: 44, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             disabled={!input.trim() || loading}
           >
             <FiSend />

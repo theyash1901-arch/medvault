@@ -120,6 +120,72 @@ export default function DoctorHome() {
           <h1>Welcome, Dr. {displayName.split(' ').pop()}</h1>
         </div>
 
+        {/* Quick Stats */}
+        <div className="summary-grid" style={{ marginBottom: 20 }}>
+          <div className="stat-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <FiUser style={{ color: 'var(--primary)' }} />
+              <span className="stat-label">Patients</span>
+            </div>
+            <div className="stat-value">—</div>
+          </div>
+          <div className="stat-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <FiFileText style={{ color: 'var(--accent)' }} />
+              <span className="stat-label">Reports Viewed</span>
+            </div>
+            <div className="stat-value">—</div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Quick Actions</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 20 }}>
+          <div className="card" style={{ textAlign: 'center', cursor: 'pointer', padding: 18 }} onClick={() => setScanning(true)}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 14, margin: '0 auto 10px',
+              background: 'rgba(32, 227, 178, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <FiMaximize style={{ color: 'var(--accent)', fontSize: '1.2rem' }} />
+            </div>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 600 }}>Scan QR</h3>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Emergency access</p>
+          </div>
+
+          <div className="card" style={{ textAlign: 'center', cursor: 'pointer', padding: 18 }} onClick={() => document.getElementById('search-patient')?.focus()}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 14, margin: '0 auto 10px',
+              background: 'rgba(0, 210, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <FiSearch style={{ color: 'var(--primary)', fontSize: '1.2rem' }} />
+            </div>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 600 }}>Find Patient</h3>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>By name or ID</p>
+          </div>
+
+          <div className="card" style={{ textAlign: 'center', cursor: 'pointer', padding: 18 }} onClick={() => window.location.href = '/doctor/profile'}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 14, margin: '0 auto 10px',
+              background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <FiUser style={{ color: '#A78BFA', fontSize: '1.2rem' }} />
+            </div>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 600 }}>My Profile</h3>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>View & edit info</p>
+          </div>
+
+          <div className="card" style={{ textAlign: 'center', cursor: 'pointer', padding: 18 }} onClick={() => { if (confirm('Sign out of MedVault?')) { /* handled by nav */ } }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 14, margin: '0 auto 10px',
+              background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <FiAlertTriangle style={{ color: '#F59E0B', fontSize: '1.2rem' }} />
+            </div>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 600 }}>Guidelines</h3>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Best practices</p>
+          </div>
+        </div>
+
         {/* Search Patient */}
         <div className="card" style={{ marginBottom: 16 }}>
           <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -141,35 +207,35 @@ export default function DoctorHome() {
           </form>
         </div>
 
-        {/* Scan QR Button */}
-        <div className="card" style={{ marginBottom: 24, textAlign: 'center' }}>
-          <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 8 }}>Quick Emergency Access</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
-            Scan a patient's emergency QR code to view critical info instantly
-          </p>
-          
-          {!scanning ? (
-            <button
-              id="btn-scan-qr"
-              className="btn btn-accent btn-lg"
-              onClick={() => setScanning(true)}
-            >
-              <FiMaximize size={16} /> Open Camera Scanner
-            </button>
-          ) : (
-            <div style={{ position: 'relative' }}>
-              <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', overflow: 'hidden', borderRadius: '12px' }}>
-                <Scanner onScan={handleQRScan} />
-              </div>
-              <button 
-                className="btn btn-outline btn-sm" 
-                style={{ marginTop: 16 }}
-                onClick={() => setScanning(false)}
-              >
-                Cancel Scan
-              </button>
+        {/* Scan QR */}
+        {scanning && (
+          <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12 }}>📷 Scanning QR Code</h3>
+            <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', overflow: 'hidden', borderRadius: '12px' }}>
+              <Scanner onScan={handleQRScan} />
             </div>
-          )}
+            <button 
+              className="btn btn-outline btn-sm" 
+              style={{ marginTop: 16 }}
+              onClick={() => setScanning(false)}
+            >
+              Cancel Scan
+            </button>
+          </div>
+        )}
+
+        {/* Doctor Tips Card */}
+        <div className="card" style={{ marginBottom: 16, background: 'rgba(0, 210, 255, 0.03)', borderColor: 'rgba(0, 210, 255, 0.1)' }}>
+          <h3 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FiHeart style={{ color: 'var(--primary)' }} />
+            How It Works
+          </h3>
+          <ul style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: 18 }}>
+            <li>Patients grant you access from their <strong>Access Control</strong> page</li>
+            <li>Search by patient name or UUID to view their records</li>
+            <li>Scan a patient's <strong>Emergency QR</strong> for instant critical info</li>
+            <li>All access is logged and can be revoked by the patient anytime</li>
+          </ul>
         </div>
 
         {error && (
