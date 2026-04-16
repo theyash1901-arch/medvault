@@ -41,7 +41,14 @@ export function AuthProvider({ children }) {
       }
     );
 
-    return () => subscription.unsubscribe();
+    const fallbackTimer = setTimeout(() => {
+      setLoading(false);
+    }, 4000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const fetchProfile = async (userId) => {
