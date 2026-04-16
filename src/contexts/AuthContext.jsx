@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const AuthContext = createContext({});
@@ -9,6 +9,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Store the access token in a ref so we never need to call getSession() again
+  const tokenRef = useRef(null);
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -20,7 +25,8 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        tokenRef.current = session.access_token;
+        fetchProfileRaw(session.user.id, session.access_token);
       } else {
         setLoading(false);
       }
@@ -33,8 +39,10 @@ export function AuthProvider({ children }) {
       async (_event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          tokenRef.current = session.access_token;
+          await fetchProfileRaw(session.user.id, session.access_token);
         } else {
+          tokenRef.current = null;
           setProfile(null);
           setLoading(false);
         }
@@ -51,19 +59,9 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const fetchProfile = async (userId) => {
+  // Raw fetch - no Supabase JS client for database ops
+  const fetchProfileRaw = async (userId, accessToken) => {
     try {
-      // Use raw fetch to bypass Supabase JS client hanging bug
-      const session = (await supabase.auth.getSession())?.data?.session;
-      if (!session) {
-        setProfile(null);
-        setLoading(false);
-        return;
-      }
-
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
 
@@ -73,7 +71,7 @@ export function AuthProvider({ children }) {
           method: 'GET',
           headers: {
             'apikey': supabaseKey,
-            'Authorization': `Bearer ${session.access_token}`,
+            'Authorization': `Bearer ${accessToken}`,
           },
           signal: controller.signal,
         }
@@ -116,6 +114,7 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
+      tokenRef.current = null;
       setUser(null);
       setProfile(null);
     }
@@ -124,14 +123,11 @@ export function AuthProvider({ children }) {
 
   const createProfile = async (profileData) => {
     try {
-      // Use raw fetch with AbortController to bypass Supabase JS client hanging bug
-      const session = (await supabase.auth.getSession())?.data?.session;
-      if (!session) {
+      const accessToken = tokenRef.current;
+      if (!accessToken) {
         return { data: null, error: { message: 'No active session. Please sign in again.' } };
       }
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       const body = { id: user.id, ...profileData };
 
       const controller = new AbortController();
@@ -144,7 +140,7 @@ export function AuthProvider({ children }) {
           headers: {
             'Content-Type': 'application/json',
             'apikey': supabaseKey,
-            'Authorization': `Bearer ${session.access_token}`,
+            'Authorization': `Bearer ${accessToken}`,
             'Prefer': 'return=representation,resolution=merge-duplicates',
           },
           body: JSON.stringify(body),
@@ -184,7 +180,7 @@ export function AuthProvider({ children }) {
     signIn,
     signOut,
     createProfile,
-    fetchProfile: () => user && fetchProfile(user.id),
+    fetchProfile: () => user && tokenRef.current && fetchProfileRaw(user.id, tokenRef.current),
   };
 
   return (
