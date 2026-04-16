@@ -99,16 +99,26 @@ export function AuthProvider({ children }) {
 
   const createProfile = async (profileData) => {
     try {
-      const { data, error } = await supabase
+      // Explicitly separate insert and update to avoid upsert hanging bugs
+      let res = await supabase
         .from('profiles')
-        .upsert({ id: user.id, ...profileData })
+        .insert({ id: user.id, ...profileData })
         .select()
         .single();
 
-      if (!error) {
-        setProfile(data);
+      if (res.error && res.error.code === '23505') { // Unique Constraint Violation
+        res = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('id', user.id)
+          .select()
+          .single();
       }
-      return { data, error };
+
+      if (!res.error) {
+        setProfile(res.data);
+      }
+      return { data: res.data, error: res.error };
     } catch (err) {
       return { data: null, error: { message: err.message || 'Failed to create profile' } };
     }
