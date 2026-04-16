@@ -193,7 +193,7 @@
      letter-spacing: 0.05em;
    }
    
-   .form-input {
+   .form-input, .form-select {
      width: 100%;
      padding: 16px 20px;
      background: rgba(255, 255, 255, 0.03);
@@ -205,11 +205,25 @@
      transition: var(--transition);
    }
    
-   .form-input:focus {
+   .form-input:focus, .form-select:focus {
      outline: none;
      border-color: var(--primary);
      background: rgba(0, 210, 255, 0.05);
      box-shadow: 0 0 0 4px var(--primary-glow);
+   }
+
+   .form-select {
+     appearance: none;
+     background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23A1A1AA%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+     background-repeat: no-repeat;
+     background-position: right 16px center;
+     background-size: 16px;
+   }
+   
+   /* Options in dark mode dropdowns are styled by the browser, but we ensure text is visible */
+   .form-select option {
+     background-color: var(--bg-elevated);
+     color: var(--text-primary);
    }
    
    /* ================= Glass Bottom Navigation ================= */
@@ -460,4 +474,59 @@
      height: 100vh;
      background-color: var(--bg-dark);
      gap: 16px;
+   }
+
+   /* Role Selection Cards */
+   .role-selection {
+     display: flex;
+     flex-direction: column;
+     gap: 16px;
+   }
+
+   .role-card {
+     display: flex;
+     align-items: center;
+     padding: 20px;
+     border: 2px solid var(--border);
+     border-radius: var(--radius-lg);
+     cursor: pointer;
+     transition: var(--transition);
+     background: rgba(255, 255, 255, 0.02);
+   }
+
+   .role-card:hover {
+     background: rgba(255, 255, 255, 0.05);
+     border-color: var(--border-light);
+   }
+
+   .role-card.selected {
+     border-color: var(--primary);
+     background: var(--primary-glow);
+     box-shadow: 0 0 20px var(--primary-glow);
+   }
+
+   .role-card-icon {
+     width: 48px;
+     height: 48px;
+     border-radius: 14px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-size: 1.5rem;
+     margin-right: 16px;
+     background: var(--bg-elevated);
+     border: 1px solid var(--border);
+   }
+
+   .role-card.selected .patient-icon { color: var(--primary) !important; background: transparent; }
+   .role-card.selected .doctor-icon { color: var(--accent) !important; background: transparent; }
+
+   .role-card-text h3 {
+     font-size: 1.05rem;
+     margin-bottom: 4px;
+   }
+
+   .role-card-text p {
+     font-size: 0.85rem;
+     line-height: 1.4;
    }
