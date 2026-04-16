@@ -7,6 +7,7 @@ import OfflineBanner from './components/OfflineBanner';
 // Lazy-loaded routes
 const LoginScreen = lazy(() => import('./screens/auth/LoginScreen'));
 const SignupScreen = lazy(() => import('./screens/auth/SignupScreen'));
+const WelcomeScreen = lazy(() => import('./screens/auth/WelcomeScreen'));
 const RoleSelectionScreen = lazy(() => import('./screens/auth/RoleSelectionScreen'));
 const PatientHome = lazy(() => import('./screens/patient/PatientHome'));
 const ProfileScreen = lazy(() => import('./screens/patient/ProfileScreen'));
@@ -80,7 +81,7 @@ function AppRoutes() {
       <div className="loading-screen">
         <div className="spinner"></div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading MedVault...</p>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.65rem', opacity: 0.4, marginTop: 8 }}>v2.1</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.65rem', opacity: 0.4, marginTop: 8 }}>v2.2</p>
       </div>
     );
   }
@@ -90,13 +91,14 @@ function AppRoutes() {
     return <SetupScreen />;
   }
 
-  // Not logged in
+  // Not logged in — show welcome page first
   if (!user) {
     return (
       <Routes>
+        <Route path="/" element={<WelcomeScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/signup" element={<SignupScreen />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
