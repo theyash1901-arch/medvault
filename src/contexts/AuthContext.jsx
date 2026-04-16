@@ -99,27 +99,53 @@ export function AuthProvider({ children }) {
 
   const createProfile = async (profileData) => {
     try {
-      // Explicitly separate insert and update to avoid upsert hanging bugs
-      let res = await supabase
-        .from('profiles')
-        .insert({ id: user.id, ...profileData })
-        .select()
-        .single();
-
-      if (res.error && res.error.code === '23505') { // Unique Constraint Violation
-        res = await supabase
-          .from('profiles')
-          .update(profileData)
-          .eq('id', user.id)
-          .select()
-          .single();
+      // Use raw fetch with AbortController to bypass Supabase JS client hanging bug
+      const session = (await supabase.auth.getSession())?.data?.session;
+      if (!session) {
+        return { data: null, error: { message: 'No active session. Please sign in again.' } };
       }
 
-      if (!res.error) {
-        setProfile(res.data);
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const body = { id: user.id, ...profileData };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/profiles`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${session.access_token}`,
+            'Prefer': 'return=representation,resolution=merge-duplicates',
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeoutId);
+
+      const text = await response.text();
+      let result;
+      try { result = JSON.parse(text); } catch { result = text; }
+
+      if (!response.ok) {
+        const msg = result?.message || result?.msg || (typeof result === 'string' ? result : JSON.stringify(result));
+        return { data: null, error: { message: `DB Error ${response.status}: ${msg}` } };
       }
-      return { data: res.data, error: res.error };
+
+      const profileRow = Array.isArray(result) ? result[0] : result;
+      if (profileRow) {
+        setProfile(profileRow);
+      }
+      return { data: profileRow, error: null };
     } catch (err) {
+      if (err.name === 'AbortError') {
+        return { data: null, error: { message: 'Request timed out after 5s. Your Supabase project may be paused — check dashboard.supabase.com' } };
+      }
       return { data: null, error: { message: err.message || 'Failed to create profile' } };
     }
   };
