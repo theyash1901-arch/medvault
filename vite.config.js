@@ -5,16 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    chunkSizeWarningLimit: 1500, // Suppress the warning up to 1.5MB
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          supabase: ['@supabase/supabase-js'],
-          ai: ['@google/genai'],
-          scanner: ['html5-qrcode']
-        }
-      }
-    }
+    chunkSizeWarningLimit: 3000, // Suppress the warning up to 3MB
   }
 })
