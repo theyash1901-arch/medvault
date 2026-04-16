@@ -111,6 +111,18 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signInWithProvider = async (provider) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: window.location.origin },
+      });
+      return { data, error };
+    } catch (err) {
+      return { data: null, error: { message: err.message || 'OAuth login failed' } };
+    }
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
@@ -178,6 +190,7 @@ export function AuthProvider({ children }) {
     isConfigured: isSupabaseConfigured,
     signUp,
     signIn,
+    signInWithProvider,
     signOut,
     createProfile,
     fetchProfile: () => user && tokenRef.current && fetchProfileRaw(user.id, tokenRef.current),
