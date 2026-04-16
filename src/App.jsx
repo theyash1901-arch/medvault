@@ -9,6 +9,7 @@ import ReportsScreen from './screens/patient/ReportsScreen';
 import MedicalSummaryScreen from './screens/patient/MedicalSummaryScreen';
 import QRScreen from './screens/patient/QRScreen';
 import AccessControlScreen from './screens/patient/AccessControlScreen';
+import AIChatScreen from './screens/patient/AIChatScreen';
 import DoctorHome from './screens/doctor/DoctorHome';
 import BottomNav from './components/BottomNav';
 import OfflineBanner from './components/OfflineBanner';
@@ -124,6 +125,7 @@ function AppRoutes() {
         <Route path="/patient/summary" element={<MedicalSummaryScreen />} />
         <Route path="/patient/qr" element={<QRScreen />} />
         <Route path="/patient/access" element={<AccessControlScreen />} />
+        <Route path="/patient/chat" element={<AIChatScreen />} />
         <Route path="*" element={<Navigate to="/patient" replace />} />
       </Routes>
       <BottomNav role="patient" />

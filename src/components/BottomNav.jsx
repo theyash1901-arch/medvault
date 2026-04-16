@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FiHome, FiFileText, FiHeart, FiMaximize, FiUser, FiLogOut, FiSearch } from 'react-icons/fi';
+import { FiHome, FiFileText, FiHeart, FiMaximize, FiUser, FiLogOut, FiSearch, FiMessageCircle } from 'react-icons/fi';
 
 export default function BottomNav({ role }) {
   const location = useLocation();
@@ -54,6 +54,12 @@ export default function BottomNav({ role }) {
           label="QR"
           active={location.pathname === '/patient/qr'}
           onClick={() => navigate('/patient/qr')}
+        />
+        <NavItem
+          icon={<FiMessageCircle />}
+          label="AI Chat"
+          active={location.pathname === '/patient/chat'}
+          onClick={() => navigate('/patient/chat')}
         />
         <NavItem
           icon={<FiHeart />}
