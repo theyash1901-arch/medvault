@@ -530,3 +530,80 @@
      font-size: 0.85rem;
      line-height: 1.4;
    }
+
+   /* ================= Desktop & Large Monitor Responsive Design ================= */
+   @media (min-width: 768px) {
+     .page {
+       padding-bottom: 0;
+       padding-left: 250px; /* Space for sidebar */
+     }
+
+     .container {
+       max-width: 900px;
+       padding: 48px 40px;
+     }
+
+     .bottom-nav {
+       top: 0;
+       bottom: 0;
+       left: 0;
+       right: auto;
+       width: 250px;
+       padding: 24px 16px;
+       background: rgba(10, 10, 15, 0.4);
+       backdrop-filter: blur(40px);
+       -webkit-backdrop-filter: blur(40px);
+       border-right: 1px solid var(--border);
+       background-image: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+     }
+
+     .bottom-nav-inner {
+       flex-direction: column;
+       justify-content: flex-start;
+       height: 100%;
+       background: transparent;
+       border: none;
+       box-shadow: none;
+       padding: 0;
+       gap: 12px;
+       margin-top: 40px; /* logo space */
+     }
+
+     .nav-item {
+       flex-direction: row;
+       justify-content: flex-start;
+       padding: 14px 20px;
+       font-size: 0.9rem;
+       font-weight: 500;
+       width: 100%;
+       border-radius: 12px;
+     }
+
+     .nav-item svg {
+       font-size: 1.25rem;
+     }
+
+     .nav-item.active {
+       background: var(--primary-glow);
+       border: 1px solid rgba(0,210,255,0.1);
+     }
+
+     .nav-item.active svg {
+       filter: drop-shadow(0 0 12px var(--primary-glow));
+     }
+
+     /* Transform grids on desktop */
+     .card {
+       padding: 32px;
+     }
+
+     h1 {
+       font-size: 2.8rem;
+     }
+     
+     .qr-container {
+       display: flex;
+       align-items: center;
+       justify-content: space-around;
+     }
+   }

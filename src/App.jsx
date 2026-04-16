@@ -1,19 +1,28 @@
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import LoginScreen from './screens/auth/LoginScreen';
-import SignupScreen from './screens/auth/SignupScreen';
-import RoleSelectionScreen from './screens/auth/RoleSelectionScreen';
-import PatientHome from './screens/patient/PatientHome';
-import ProfileScreen from './screens/patient/ProfileScreen';
-import ReportsScreen from './screens/patient/ReportsScreen';
-import MedicalSummaryScreen from './screens/patient/MedicalSummaryScreen';
-import QRScreen from './screens/patient/QRScreen';
-import AccessControlScreen from './screens/patient/AccessControlScreen';
-import AIChatScreen from './screens/patient/AIChatScreen';
-import DoctorHome from './screens/doctor/DoctorHome';
-import DoctorProfileScreen from './screens/doctor/DoctorProfileScreen';
 import BottomNav from './components/BottomNav';
 import OfflineBanner from './components/OfflineBanner';
+
+// Lazy-loaded routes
+const LoginScreen = lazy(() => import('./screens/auth/LoginScreen'));
+const SignupScreen = lazy(() => import('./screens/auth/SignupScreen'));
+const RoleSelectionScreen = lazy(() => import('./screens/auth/RoleSelectionScreen'));
+const PatientHome = lazy(() => import('./screens/patient/PatientHome'));
+const ProfileScreen = lazy(() => import('./screens/patient/ProfileScreen'));
+const ReportsScreen = lazy(() => import('./screens/patient/ReportsScreen'));
+const MedicalSummaryScreen = lazy(() => import('./screens/patient/MedicalSummaryScreen'));
+const QRScreen = lazy(() => import('./screens/patient/QRScreen'));
+const AccessControlScreen = lazy(() => import('./screens/patient/AccessControlScreen'));
+const AIChatScreen = lazy(() => import('./screens/patient/AIChatScreen'));
+const DoctorHome = lazy(() => import('./screens/doctor/DoctorHome'));
+const DoctorProfileScreen = lazy(() => import('./screens/doctor/DoctorProfileScreen'));
+
+const FastSpinner = () => (
+  <div className="loading-screen" style={{ background: 'transparent' }}>
+    <div className="spinner" style={{ borderColor: 'rgba(255,255,255,0.05)', borderTopColor: 'var(--primary)' }}></div>
+  </div>
+);
 
 function SetupScreen() {
   return (
@@ -139,7 +148,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <Suspense fallback={<FastSpinner />}>
+          <AppRoutes />
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );
