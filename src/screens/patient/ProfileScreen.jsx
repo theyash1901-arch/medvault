@@ -112,6 +112,11 @@ export default function ProfileScreen() {
     } catch (err) {
       // Save offline anyway
       await offlineStore.save(`profile_${user.id}`, formData);
+      // Feature 6: Add to sync queue
+      await offlineStore.addToSyncQueue({
+        type: 'upsert_profile',
+        payload: { id: user.id, role: 'patient', ...formData }
+      });
       setMessage({
         type: 'error',
         text: 'Saved locally. Will sync when online.'

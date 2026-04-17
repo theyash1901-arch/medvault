@@ -69,4 +69,49 @@ export const offlineStore = {
       return null;
     }
   },
+
+  // ----------------------------------------
+  // Feature 6: Sync Queue mechanism
+  // ----------------------------------------
+  
+  // Add operation to queue
+  addToSyncQueue: async (operation) => {
+    try {
+      const queueStr = await get('sync_queue');
+      const queue = queueStr ? JSON.parse(queueStr) : [];
+      queue.push({
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        ...operation
+      });
+      await set('sync_queue', JSON.stringify(queue));
+      return true;
+    } catch (err) {
+      console.error('Failed to add to sync queue:', err);
+      return false;
+    }
+  },
+
+  // Get current sync queue
+  getSyncQueue: async () => {
+    try {
+      const queueStr = await get('sync_queue');
+      return queueStr ? JSON.parse(queueStr) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  // Remove successful operation from queue
+  removeFromSyncQueue: async (operationId) => {
+    try {
+      const queueStr = await get('sync_queue');
+      if (!queueStr) return;
+      const queue = JSON.parse(queueStr);
+      const newQueue = queue.filter(item => item.id !== operationId);
+      await set('sync_queue', JSON.stringify(newQueue));
+    } catch (err) {
+      console.error('Failed to remove from sync queue:', err);
+    }
+  },
 };
