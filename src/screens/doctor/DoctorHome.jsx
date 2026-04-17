@@ -210,23 +210,7 @@ export default function DoctorHome() {
           <h1>Welcome, Dr. {displayName.split(' ').pop()}</h1>
         </div>
 
-        {/* Quick Stats */}
-        <div className="summary-grid" style={{ marginBottom: 20 }}>
-          <div className="stat-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <FiUser style={{ color: 'var(--primary)' }} />
-              <span className="stat-label">Patients</span>
-            </div>
-            <div className="stat-value">{stats.patients}</div>
-          </div>
-          <div className="stat-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <FiFileText style={{ color: 'var(--accent)' }} />
-              <span className="stat-label">Accessible Reports</span>
-            </div>
-            <div className="stat-value">{stats.reports}</div>
-          </div>
-        </div>
+
 
         {/* Quick Actions */}
         <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Quick Actions</h3>
@@ -276,37 +260,7 @@ export default function DoctorHome() {
           </div>
         </div>
 
-        {/* My Patients List */}
-        {myPatientsList.length > 0 && (
-          <div className="card" style={{ marginBottom: 16 }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FiUser style={{ color: 'var(--primary)' }} />
-              My Patients
-            </h3>
-            <div style={{ display: 'grid', gap: 8 }}>
-              {myPatientsList.map(p => (
-                <div key={p.id} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '12px 14px', background: 'rgba(0,0,0,0.02)', borderRadius: 8, border: '1px solid rgba(0,0,0,0.05)'
-                }}>
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>{p.full_name}</h4>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                      ID: {p.patient_code || '—'} • {p.gender || '—'} • {p.blood_group || '—'}
-                    </p>
-                  </div>
-                  <button 
-                    className="btn btn-outline btn-sm"
-                    onClick={() => fetchPatientDetails(p.id, p)}
-                    disabled={loading}
-                  >
-                    View
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Search Patient */}
         <div className="card" style={{ marginBottom: 16 }}>
