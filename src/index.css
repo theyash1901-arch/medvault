@@ -718,6 +718,10 @@
      justify-content: center;
      background: rgba(255, 255, 255, 0.02);
      transition: var(--transition);
+     padding: 24px;
+     min-height: 120px;
+     text-align: center;
+     cursor: pointer;
    }
    
    .upload-zone:hover {
@@ -853,6 +857,8 @@
      padding: 32px;
      width: 100%;
      max-width: 480px;
+     max-height: 90vh;
+     overflow-y: auto;
      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
      animation: slideUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
      position: relative;

@@ -39,3 +39,53 @@ Rules:
     throw new Error('Failed to connect to the AI Assistant. Please try again.');
   }
 };
+
+export const analyzeMedicalReport = async (base64Data, mimeType) => {
+  try {
+    if (!aiInstance) {
+      if (!import.meta.env.VITE_GEMINI_API_KEY) {
+        throw new Error('Gemini API key is completely missing.');
+      }
+      aiInstance = new GoogleGenAI({ 
+        apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+      });
+    }
+
+    const systemInstruction = `You are a medical data extraction tool.
+Analyze the provided medical report (image or document).
+Extract the following information and return ONLY a valid JSON object with the exact keys:
+{
+  "conditions": ["List of diagnosed diseases, conditions, or chronic issues"],
+  "allergies": ["List of any allergies mentioned"],
+  "current_medications": ["List of medications and dosages prescribed or mentioned"]
+}
+If a field is not found in the document, return an empty array for that field.
+Do not wrap the JSON in markdown code blocks, return raw JSON string.`;
+
+    const response = await aiInstance.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType: mimeType
+          }
+        },
+        "Extract the medical data into the requested JSON format."
+      ],
+      config: {
+        systemInstruction,
+        temperature: 0.2,
+      }
+    });
+
+    const text = response.text.trim();
+    // In case it returns markdown block anyway
+    const jsonStr = text.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+    
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error("Gemini Extraction Error:", error);
+    throw new Error('Failed to analyze the report.');
+  }
+};

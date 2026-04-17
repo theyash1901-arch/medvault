@@ -3,6 +3,19 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { offlineStore } from '../../lib/offlineStore';
 import { FiUpload, FiFileText, FiImage, FiTrash2, FiDownload, FiFilter } from 'react-icons/fi';
+import { analyzeMedicalReport } from '../../lib/gemini';
+
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+      resolve({ base64, mimeType: file.type });
+    };
+    reader.onerror = error => reject(error);
+  });
+};
 
 const REPORT_TYPES = [
   { value: 'blood_test', label: 'Blood Test', icon: '🩸' },
@@ -12,10 +25,11 @@ const REPORT_TYPES = [
 ];
 
 export default function ReportsScreen() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [filter, setFilter] = useState('all');
   const [uploadData, setUploadData] = useState({ title: '', report_type: 'other', file: null });
@@ -84,6 +98,42 @@ export default function ReportsScreen() {
       if (dbError) throw dbError;
 
       setReports(prev => [report, ...prev]);
+
+      // Perform AI Analysis automatically
+      setAnalyzing(true);
+      try {
+        const { base64, mimeType } = await fileToBase64(uploadData.file);
+        const aiData = await analyzeMedicalReport(base64, mimeType);
+        
+        // Fetch current summary to merge
+        const { data: curSummary } = await supabase
+          .from('medical_summaries')
+          .select('*')
+          .eq('patient_id', user.id)
+          .single();
+          
+        const newConditions = [...new Set([...(curSummary?.conditions || []), ...(aiData.conditions || [])])];
+        const newAllergies = [...new Set([...(curSummary?.allergies || []), ...(aiData.allergies || [])])];
+        const newMeds = [...new Set([...(curSummary?.current_medications || []), ...(aiData.current_medications || [])])];
+        
+        const mergedSummary = {
+          patient_id: user.id,
+          conditions: newConditions,
+          allergies: newAllergies,
+          current_medications: newMeds,
+          updated_at: new Date().toISOString()
+        };
+
+        await supabase.from('medical_summaries').upsert(mergedSummary, { onConflict: 'patient_id' });
+        
+        if (profile) {
+          await offlineStore.saveEmergencyData(profile, mergedSummary);
+        }
+      } catch (aiErr) {
+        console.error("AI Analysis failed:", aiErr);
+      }
+      setAnalyzing(false);
+
       setShowUpload(false);
       setUploadData({ title: '', report_type: 'other', file: null });
     } catch (err) {
@@ -237,11 +287,19 @@ export default function ReportsScreen() {
                     id="upload-submit"
                     type="submit"
                     className="btn btn-primary btn-full"
-                    disabled={uploading || !uploadData.file}
+                    disabled={uploading || analyzing || !uploadData.file}
                   >
-                    {uploading ? (
-                      <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }}></span>
-                    ) : 'Upload'}
+                    {uploading && !analyzing && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }}></span> Uploading...
+                      </span>
+                    )}
+                    {analyzing && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }}></span> Analyzing Report...
+                      </span>
+                    )}
+                    {!uploading && !analyzing && 'Upload & Analyze'}
                   </button>
                 </div>
               </form>
