@@ -14,6 +14,7 @@ export default function DoctorHome() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [stats, setStats] = useState({ patients: '—', reports: '—' });
+  const [myPatientsList, setMyPatientsList] = useState([]);
 
   useEffect(() => {
     if (profile?.id) fetchStats();
@@ -31,11 +32,19 @@ export default function DoctorHome() {
       
       let reportsCount = 0;
       if (pIds.length > 0) {
+        const { data: profilesList } = await supabase
+          .from('profiles')
+          .select('id, full_name, patient_code, gender, blood_group, date_of_birth, phone, emergency_contact_name')
+          .in('id', pIds);
+        setMyPatientsList(profilesList || []);
+
         const { count } = await supabase
           .from('reports')
           .select('*', { count: 'exact', head: true })
           .in('patient_id', pIds);
         reportsCount = count || 0;
+      } else {
+        setMyPatientsList([]);
       }
 
       setStats({
@@ -48,6 +57,34 @@ export default function DoctorHome() {
   };
 
   const displayName = profile?.full_name || 'Doctor';
+
+  const fetchPatientDetails = async (patientId, patientObj = null) => {
+    setLoading(true);
+    setError('');
+    setScannedData(null);
+    setSearchId('');
+    
+    try {
+      let patientItem = patientObj;
+      if (!patientItem) {
+        const { data } = await supabase.from('profiles').select('*').eq('id', patientId).single();
+        patientItem = data;
+      }
+      if (!patientItem) throw new Error('Patient not found');
+
+      const [summaryRes, reportsRes] = await Promise.all([
+        supabase.from('medical_summaries').select('*').eq('patient_id', patientId).single(),
+        supabase.from('reports').select('*').eq('patient_id', patientId).order('uploaded_at', { ascending: false }),
+      ]);
+
+      setPatientData({ ...patientItem, summary: summaryRes.data });
+      setPatientReports(reportsRes.data || []);
+      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+    } catch (err) {
+      setError('Could not load patient details: ' + err.message);
+    }
+    setLoading(false);
+  };
 
   const searchPatient = async (e) => {
     e?.preventDefault();
@@ -120,17 +157,7 @@ export default function DoctorHome() {
         return;
       }
 
-      // Fetch patient data
-      const [summaryRes, reportsRes] = await Promise.all([
-        supabase.from('medical_summaries').select('*').eq('patient_id', patient.id).single(),
-        supabase.from('reports').select('*').eq('patient_id', patient.id).order('uploaded_at', { ascending: false }),
-      ]);
-
-      setPatientData({
-        ...patient,
-        summary: summaryRes.data,
-      });
-      setPatientReports(reportsRes.data || []);
+      await fetchPatientDetails(patient.id, patient);
     } catch (err) {
       setError('Search failed: ' + err.message);
     }
@@ -229,6 +256,38 @@ export default function DoctorHome() {
             <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Best practices</p>
           </div>
         </div>
+
+        {/* My Patients List */}
+        {myPatientsList.length > 0 && (
+          <div className="card" style={{ marginBottom: 16 }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FiUser style={{ color: 'var(--primary)' }} />
+              My Patients
+            </h3>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {myPatientsList.map(p => (
+                <div key={p.id} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '12px 14px', background: 'rgba(0,0,0,0.02)', borderRadius: 8, border: '1px solid rgba(0,0,0,0.05)'
+                }}>
+                  <div>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>{p.full_name}</h4>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                      ID: {p.patient_code || '—'} • {p.gender || '—'} • {p.blood_group || '—'}
+                    </p>
+                  </div>
+                  <button 
+                    className="btn btn-outline btn-sm"
+                    onClick={() => fetchPatientDetails(p.id, p)}
+                    disabled={loading}
+                  >
+                    View
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Search Patient */}
         <div className="card" style={{ marginBottom: 16 }}>
