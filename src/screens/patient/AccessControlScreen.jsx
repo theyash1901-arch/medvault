@@ -233,24 +233,6 @@ export default function AccessControlScreen() {
             <FiUserPlus style={{ color: 'var(--primary)' }} />
             Grant Access to a Doctor
           </h3>
-<<<<<<< HEAD
-          <form onSubmit={grantAccess} style={{ display: 'flex', gap: 10 }}>
-            <input
-              id="grant-doctor-id"
-              className="form-input"
-              placeholder="Doctor ID (e.g. AYUS1234) or name"
-              value={doctorEmail}
-              onChange={(e) => setDoctorEmail(e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <button
-              type="submit"
-              className="btn btn-primary btn-sm"
-              disabled={granting || !doctorEmail.trim()}
-            >
-              {granting ? '...' : 'Grant'}
-            </button>
-=======
           <form onSubmit={grantAccess}>
             <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
               <input
@@ -296,7 +278,6 @@ export default function AccessControlScreen() {
                 ))}
               </div>
             </div>
->>>>>>> 534a800 (feat: implement 7 advanced features, Apple OAuth, & UI responsive overhaul)
           </form>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
             Ask your doctor for their MedVault ID (e.g. <strong>AYUS1234</strong>)

@@ -14,79 +14,6 @@ export default function DoctorHome() {
   const [patientTimeline, setPatientTimeline] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-<<<<<<< HEAD
-  const [stats, setStats] = useState({ patients: '—', reports: '—' });
-  const [myPatientsList, setMyPatientsList] = useState([]);
-
-  useEffect(() => {
-    if (profile?.id) fetchStats();
-  }, [profile]);
-
-  const fetchStats = async () => {
-    try {
-      const { data: grants } = await supabase
-        .from('access_grants')
-        .select('patient_id')
-        .eq('doctor_id', profile.id)
-        .is('revoked_at', null);
-      
-      const pIds = grants?.map(g => g.patient_id) || [];
-      
-      let reportsCount = 0;
-      if (pIds.length > 0) {
-        const { data: profilesList } = await supabase
-          .from('profiles')
-          .select('id, full_name, patient_code, gender, blood_group, date_of_birth, phone, emergency_contact_name')
-          .in('id', pIds);
-        setMyPatientsList(profilesList || []);
-
-        const { count } = await supabase
-          .from('reports')
-          .select('*', { count: 'exact', head: true })
-          .in('patient_id', pIds);
-        reportsCount = count || 0;
-      } else {
-        setMyPatientsList([]);
-      }
-
-      setStats({
-        patients: pIds.length,
-        reports: reportsCount
-      });
-    } catch {
-      // Keep placeholders on error
-    }
-  };
-
-  const displayName = profile?.full_name || 'Doctor';
-
-  const fetchPatientDetails = async (patientId, patientObj = null) => {
-    setLoading(true);
-    setError('');
-    setScannedData(null);
-    setSearchId('');
-    
-    try {
-      let patientItem = patientObj;
-      if (!patientItem) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', patientId).single();
-        patientItem = data;
-      }
-      if (!patientItem) throw new Error('Patient not found');
-
-      const [summaryRes, reportsRes] = await Promise.all([
-        supabase.from('medical_summaries').select('*').eq('patient_id', patientId).single(),
-        supabase.from('reports').select('*').eq('patient_id', patientId).order('uploaded_at', { ascending: false }),
-      ]);
-
-      setPatientData({ ...patientItem, summary: summaryRes.data });
-      setPatientReports(reportsRes.data || []);
-      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
-    } catch (err) {
-      setError('Could not load patient details: ' + err.message);
-    }
-    setLoading(false);
-=======
   const [activeTab, setActiveTab] = useState('summary');
   const [grantedPatients, setGrantedPatients] = useState([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
@@ -132,7 +59,6 @@ export default function DoctorHome() {
     } catch {
       // Access logging is best-effort
     }
->>>>>>> 534a800 (feat: implement 7 advanced features, Apple OAuth, & UI responsive overhaul)
   };
 
   const searchPatient = async (e) => {
@@ -158,43 +84,7 @@ export default function DoctorHome() {
       const grantedIds = validGrants.map(g => g.patient_id);
 
       // Search by name or ID
-<<<<<<< HEAD
-      let query = supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'patient');
-
-      // Try patient_code first, then UUID, then name search
       let patients = [];
-      const { data: byCode } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'patient')
-        .ilike('patient_code', searchId.trim())
-        .limit(1);
-
-      if (byCode && byCode.length > 0) {
-        patients = byCode;
-      } else {
-        try {
-          const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', searchId.trim())
-            .eq('role', 'patient')
-            .single();
-          patients = data ? [data] : [];
-        } catch {
-          const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('role', 'patient')
-            .ilike('full_name', `%${searchId.trim()}%`)
-            .limit(5);
-          patients = data || [];
-        }
-=======
-      let patients;
       try {
         const { data } = await supabase
           .from('profiles')
@@ -211,7 +101,6 @@ export default function DoctorHome() {
           .ilike('full_name', `%${searchId.trim()}%`)
           .limit(5);
         patients = data || [];
->>>>>>> 534a800 (feat: implement 7 advanced features, Apple OAuth, & UI responsive overhaul)
       }
 
       if (patients.length === 0) {
@@ -229,9 +118,6 @@ export default function DoctorHome() {
         return;
       }
 
-<<<<<<< HEAD
-      await fetchPatientDetails(patient.id, patient);
-=======
       // Log the access
       await logAccess(patient.id, 'view', 'Searched and viewed patient records');
 
@@ -248,7 +134,6 @@ export default function DoctorHome() {
       });
       setPatientReports(reportsRes.data || []);
       setPatientTimeline(timelineRes.data || []);
->>>>>>> 534a800 (feat: implement 7 advanced features, Apple OAuth, & UI responsive overhaul)
     } catch (err) {
       setError('Search failed: ' + err.message);
     }
@@ -444,14 +329,6 @@ export default function DoctorHome() {
           </form>
         </div>
 
-<<<<<<< HEAD
-        {/* Scan QR */}
-        {scanning && (
-          <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12 }}>📷 Scanning QR Code</h3>
-            <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', overflow: 'hidden', borderRadius: '12px' }}>
-              <Scanner onScan={handleQRScan} />
-=======
         {/* Scan QR Button */}
         <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
           <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 8 }}>Quick Emergency Access</h3>
@@ -479,7 +356,6 @@ export default function DoctorHome() {
               >
                 Cancel Scan
               </button>
->>>>>>> 534a800 (feat: implement 7 advanced features, Apple OAuth, & UI responsive overhaul)
             </div>
             <button 
               className="btn btn-outline btn-sm" 
