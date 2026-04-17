@@ -33,6 +33,13 @@ export default function OnboardingScreen() {
 
   const updateField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
+  // Generate a human-friendly doctor code: first 4 letters (uppercase) + 4 random digits
+  const generateDoctorCode = (name) => {
+    const letters = name.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 4).padEnd(4, 'X');
+    const digits = String(Math.floor(1000 + Math.random() * 9000));
+    return `${letters}${digits}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.full_name.trim()) {
@@ -57,6 +64,10 @@ export default function OnboardingScreen() {
         payload.emergency_contact_phone = form.emergency_contact_phone.trim();
       } else {
         payload.gender = form.gender;
+        // Generate a unique doctor code if not already set
+        if (!profile.doctor_code) {
+          payload.doctor_code = generateDoctorCode(form.full_name.trim());
+        }
       }
 
       const { error: profileError } = await createProfile(payload);

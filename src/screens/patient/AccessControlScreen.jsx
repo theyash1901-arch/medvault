@@ -40,35 +40,51 @@ export default function AccessControlScreen() {
     setMessage({ type: '', text: '' });
 
     try {
-      // Find doctor by email — look up in profiles
+      const input = doctorEmail.trim();
+
+      // 1. Try matching by doctor_code (e.g. AYUS1234)
+      const { data: byCode } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'doctor')
+        .ilike('doctor_code', input)
+        .limit(1);
+
+      if (byCode && byCode.length > 0) {
+        await insertGrant(byCode[0].id);
+        return;
+      }
+
+      // 2. Try matching by full name (partial)
       const { data: doctors, error: findError } = await supabase
         .from('profiles')
         .select('id, full_name')
         .eq('role', 'doctor')
-        .ilike('full_name', `%${doctorEmail.trim()}%`)
+        .ilike('full_name', `%${input}%`)
         .limit(1);
 
       if (findError) throw findError;
 
-      if (!doctors || doctors.length === 0) {
-        // Try matching by direct ID
-        const { data: directDoc, error: directErr } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .eq('id', doctorEmail.trim())
-          .eq('role', 'doctor')
-          .single();
-
-        if (directErr || !directDoc) {
-          setMessage({ type: 'error', text: 'Doctor not found. Ask them to share their ID.' });
-          setGranting(false);
-          return;
-        }
-
-        await insertGrant(directDoc.id);
-      } else {
+      if (doctors && doctors.length > 0) {
         await insertGrant(doctors[0].id);
+        return;
       }
+
+      // 3. Try matching by direct UUID
+      const { data: directDoc, error: directErr } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('id', input)
+        .eq('role', 'doctor')
+        .single();
+
+      if (directErr || !directDoc) {
+        setMessage({ type: 'error', text: 'Doctor not found. Check the ID or name and try again.' });
+        setGranting(false);
+        return;
+      }
+
+      await insertGrant(directDoc.id);
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
     }
@@ -149,7 +165,7 @@ export default function AccessControlScreen() {
             <input
               id="grant-doctor-id"
               className="form-input"
-              placeholder="Doctor name or ID"
+              placeholder="Doctor ID (e.g. AYUS1234) or name"
               value={doctorEmail}
               onChange={(e) => setDoctorEmail(e.target.value)}
               style={{ flex: 1 }}
@@ -163,7 +179,7 @@ export default function AccessControlScreen() {
             </button>
           </form>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
-            Ask your doctor for their MedVault ID or name
+            Ask your doctor for their MedVault ID (e.g. <strong>AYUS1234</strong>)
           </p>
         </div>
 

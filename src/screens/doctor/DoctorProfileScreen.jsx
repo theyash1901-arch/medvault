@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { FiUser, FiBriefcase, FiAward, FiMapPin, FiSave, FiLogOut } from 'react-icons/fi';
+import { FiUser, FiBriefcase, FiAward, FiMapPin, FiSave, FiLogOut, FiCopy, FiCheck } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 export default function DoctorProfileScreen() {
@@ -15,6 +15,16 @@ export default function DoctorProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const copyDoctorCode = () => {
+    if (profile?.doctor_code) {
+      navigator.clipboard.writeText(profile.doctor_code).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
 
   useEffect(() => {
     loadProfile();
@@ -104,6 +114,38 @@ export default function DoctorProfileScreen() {
               <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Dr. {profile?.full_name}</h2>
               <p style={{ color: 'var(--text-muted)' }}>{profile?.phone}</p>
             </div>
+          </div>
+
+          {/* Doctor ID Card */}
+          <div style={{
+            background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+            borderRadius: 12, padding: '14px 18px', marginBottom: 24,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
+                Your MedVault Doctor ID
+              </p>
+              <p style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.12em', fontFamily: 'monospace' }}>
+                {profile?.doctor_code || '—'}
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.72rem', marginTop: 4 }}>
+                Share this ID with patients to grant access
+              </p>
+            </div>
+            <button
+              onClick={copyDoctorCode}
+              style={{
+                background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)',
+                borderRadius: 8, padding: '8px 12px', color: '#fff', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', fontWeight: 600,
+                transition: 'background 0.2s',
+              }}
+              title="Copy Doctor ID"
+            >
+              {copied ? <FiCheck size={15} /> : <FiCopy size={15} />}
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
           </div>
 
           <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
