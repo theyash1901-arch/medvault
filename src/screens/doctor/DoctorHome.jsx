@@ -41,24 +41,35 @@ export default function DoctorHome() {
         .select('*')
         .eq('role', 'patient');
 
-      // Try UUID first, then name search
-      let patients;
-      try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', searchId.trim())
-          .eq('role', 'patient')
-          .single();
-        patients = data ? [data] : [];
-      } catch {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('role', 'patient')
-          .ilike('full_name', `%${searchId.trim()}%`)
-          .limit(5);
-        patients = data || [];
+      // Try patient_code first, then UUID, then name search
+      let patients = [];
+      const { data: byCode } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'patient')
+        .ilike('patient_code', searchId.trim())
+        .limit(1);
+
+      if (byCode && byCode.length > 0) {
+        patients = byCode;
+      } else {
+        try {
+          const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', searchId.trim())
+            .eq('role', 'patient')
+            .single();
+          patients = data ? [data] : [];
+        } catch {
+          const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'patient')
+            .ilike('full_name', `%${searchId.trim()}%`)
+            .limit(5);
+          patients = data || [];
+        }
       }
 
       if (patients.length === 0) {
