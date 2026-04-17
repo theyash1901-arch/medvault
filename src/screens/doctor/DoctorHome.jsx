@@ -13,6 +13,39 @@ export default function DoctorHome() {
   const [patientReports, setPatientReports] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [stats, setStats] = useState({ patients: '—', reports: '—' });
+
+  useEffect(() => {
+    if (profile?.id) fetchStats();
+  }, [profile]);
+
+  const fetchStats = async () => {
+    try {
+      const { data: grants } = await supabase
+        .from('access_grants')
+        .select('patient_id')
+        .eq('doctor_id', profile.id)
+        .is('revoked_at', null);
+      
+      const pIds = grants?.map(g => g.patient_id) || [];
+      
+      let reportsCount = 0;
+      if (pIds.length > 0) {
+        const { count } = await supabase
+          .from('reports')
+          .select('*', { count: 'exact', head: true })
+          .in('patient_id', pIds);
+        reportsCount = count || 0;
+      }
+
+      setStats({
+        patients: pIds.length,
+        reports: reportsCount
+      });
+    } catch {
+      // Keep placeholders on error
+    }
+  };
 
   const displayName = profile?.full_name || 'Doctor';
 
@@ -138,14 +171,14 @@ export default function DoctorHome() {
               <FiUser style={{ color: 'var(--primary)' }} />
               <span className="stat-label">Patients</span>
             </div>
-            <div className="stat-value">—</div>
+            <div className="stat-value">{stats.patients}</div>
           </div>
           <div className="stat-card">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <FiFileText style={{ color: 'var(--accent)' }} />
-              <span className="stat-label">Reports Viewed</span>
+              <span className="stat-label">Accessible Reports</span>
             </div>
-            <div className="stat-value">—</div>
+            <div className="stat-value">{stats.reports}</div>
           </div>
         </div>
 
