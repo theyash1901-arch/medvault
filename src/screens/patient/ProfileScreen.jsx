@@ -2,7 +2,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { offlineStore } from '../../lib/offlineStore';
-import { FiSave, FiCheckCircle, FiAlertCircle, FiUser } from 'react-icons/fi';
+import { FiSave, FiCheckCircle, FiAlertCircle, FiUser, FiCopy, FiCheck } from 'react-icons/fi';
+
+// Generate code: first 4 letters of name (uppercase) + 4 random digits
+const generateUniqueCode = (name = '') => {
+  const letters = name.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 4).padEnd(4, 'X');
+  const digits = String(Math.floor(1000 + Math.random() * 9000));
+  return `${letters}${digits}`;
+};
 
 export default function ProfileScreen() {
   const { user, profile, fetchProfile } = useAuth();
@@ -17,9 +24,42 @@ export default function ProfileScreen() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [copied, setCopied] = useState(false);
+  const [patientCode, setPatientCode] = useState(profile?.patient_code || '');
+
+  const copyPatientCode = () => {
+    const code = patientCode || profile?.patient_code;
+    if (code) {
+      navigator.clipboard.writeText(code).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
+
+  // Auto-generate patient_code for existing patients who don't have one yet
+  const ensurePatientCode = async (currentProfile) => {
+    if (currentProfile?.patient_code) {
+      setPatientCode(currentProfile.patient_code);
+      return;
+    }
+    const code = generateUniqueCode(currentProfile?.full_name || '');
+    const { error } = await supabase
+      .from('profiles')
+      .update({ patient_code: code })
+      .eq('id', user.id);
+    if (!error) {
+      setPatientCode(code);
+      if (fetchProfile) fetchProfile();
+    }
+  };
 
   useEffect(() => {
     loadProfile();
+  }, [profile]);
+
+  useEffect(() => {
+    if (profile) ensurePatientCode(profile);
   }, [profile]);
 
   const loadProfile = async () => {
@@ -110,6 +150,39 @@ export default function ProfileScreen() {
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             {user?.email}
           </p>
+        </div>
+
+        {/* Patient ID Card */}
+        <div style={{
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+          borderRadius: 12, padding: '14px 18px', marginBottom: 24,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
+              Your MedVault Patient ID
+            </p>
+            <p style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.12em', fontFamily: 'monospace' }}>
+              {patientCode || <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>Generating...</span>}
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.72rem', marginTop: 4 }}>
+              Share this ID to easily connect with doctors
+            </p>
+          </div>
+          <button
+            onClick={copyPatientCode}
+            type="button"
+            style={{
+              background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)',
+              borderRadius: 8, padding: '8px 12px', color: '#fff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', fontWeight: 600,
+              transition: 'background 0.2s',
+            }}
+            title="Copy Patient ID"
+          >
+            {copied ? <FiCheck size={15} /> : <FiCopy size={15} />}
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>

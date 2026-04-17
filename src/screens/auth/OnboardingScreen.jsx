@@ -33,8 +33,8 @@ export default function OnboardingScreen() {
 
   const updateField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
-  // Generate a human-friendly doctor code: first 4 letters (uppercase) + 4 random digits
-  const generateDoctorCode = (name) => {
+  // Generate a human-friendly unique code: first 4 letters (uppercase) + 4 random digits
+  const generateUniqueCode = (name) => {
     const letters = name.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 4).padEnd(4, 'X');
     const digits = String(Math.floor(1000 + Math.random() * 9000));
     return `${letters}${digits}`;
@@ -62,11 +62,15 @@ export default function OnboardingScreen() {
         payload.blood_group = form.blood_group;
         payload.emergency_contact_name = form.emergency_contact_name.trim();
         payload.emergency_contact_phone = form.emergency_contact_phone.trim();
+        // Generate a unique patient code if not already set
+        if (!profile.patient_code) {
+          payload.patient_code = generateUniqueCode(form.full_name.trim());
+        }
       } else {
         payload.gender = form.gender;
         // Generate a unique doctor code if not already set
         if (!profile.doctor_code) {
-          payload.doctor_code = generateDoctorCode(form.full_name.trim());
+          payload.doctor_code = generateUniqueCode(form.full_name.trim());
         }
       }
 
