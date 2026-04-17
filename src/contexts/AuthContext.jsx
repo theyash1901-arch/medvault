@@ -96,6 +96,13 @@ export function AuthProvider({ children }) {
     return { data, error };
   };
 
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+    return { data, error };
+  };
+
   const createProfile = async (profileData) => {
     const { data, error } = await supabase
       .from('profiles')
@@ -118,6 +125,7 @@ export function AuthProvider({ children }) {
     signIn,
     signOut,
     signInWithApple,
+    signInWithGoogle,
     createProfile,
     fetchProfile: () => user && fetchProfile(user.id),
   };

@@ -825,5 +825,40 @@
      h1 {
        font-size: 1.6rem;
      }
+     }
    }
 
+   /* ================= Modal Styling ================= */
+   .modal-overlay {
+     position: fixed;
+     top: 0;
+     left: 0;
+     right: 0;
+     bottom: 0;
+     background: rgba(5, 5, 5, 0.85);
+     backdrop-filter: blur(8px);
+     -webkit-backdrop-filter: blur(8px);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     z-index: 1000;
+     padding: 20px;
+     animation: fadeIn 0.2s ease-out;
+   }
+
+   .modal-content {
+     background: var(--bg-elevated);
+     border: 1px solid var(--border);
+     border-radius: var(--radius-lg);
+     padding: 32px;
+     width: 100%;
+     max-width: 480px;
+     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+     animation: slideUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+     position: relative;
+   }
+
+   .modal-content h2 {
+     margin-bottom: 24px;
+     font-size: 1.4rem;
+   }

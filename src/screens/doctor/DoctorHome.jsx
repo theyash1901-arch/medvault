@@ -419,54 +419,64 @@ export default function DoctorHome() {
               ))}
             </div>
 
-            {/* Summary Tab */}
             {activeTab === 'summary' && patientData.summary && (
               <div className="card" style={{ marginBottom: 16 }}>
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <FiHeart style={{ color: 'var(--danger)' }} />
                   Medical Summary
                 </h3>
 
-                <div style={{ display: 'grid', gap: 12 }}>
-                  {patientData.summary.conditions?.length > 0 && (
-                    <div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Conditions</span>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                        {patientData.summary.conditions.map((c, i) => <span key={i} className="tag tag-primary">{c}</span>)}
+                <div className="grid-desktop-only" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                  <div style={{ display: 'grid', gap: 16 }}>
+                    {patientData.summary.conditions?.length > 0 && (
+                      <div>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Conditions</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                          {patientData.summary.conditions.map((c, i) => <span key={i} className="tag tag-primary">{c}</span>)}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {patientData.summary.allergies?.length > 0 && (
-                    <div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>⚠️ Allergies</span>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                        {patientData.summary.allergies.map((a, i) => <span key={i} className="tag tag-danger">{a}</span>)}
+                    )}
+                    {patientData.summary.allergies?.length > 0 && (
+                      <div>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>⚠️ Allergies</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                          {patientData.summary.allergies.map((a, i) => <span key={i} className="tag tag-danger">{a}</span>)}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {patientData.summary.current_medications?.length > 0 && (
-                    <div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>💊 Medications</span>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-                        {patientData.summary.current_medications.map((m, i) => (
-                          <div key={i} style={{
-                            padding: '8px 12px', background: 'rgba(255,255,255,0.02)',
-                            borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
-                            fontSize: '0.85rem', fontWeight: 500
-                          }}>
-                            💊 {m}
-                          </div>
-                        ))}
+                    )}
+                    {patientData.summary.current_medications?.length > 0 && (
+                      <div>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>💊 Medications</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
+                          {patientData.summary.current_medications.map((m, i) => (
+                            <div key={i} style={{
+                              padding: '10px 14px', background: 'rgba(255,255,255,0.03)',
+                              borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                              fontSize: '0.9rem', fontWeight: 500
+                            }}>
+                              {m}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    <DataRow label="Blood Pressure" value={patientData.summary.blood_pressure} />
-                    <DataRow label="Blood Sugar" value={patientData.summary.blood_sugar} />
+                    )}
                   </div>
-                  {patientData.summary.notes && (
-                    <DataRow label="Notes" value={patientData.summary.notes} />
-                  )}
+                  
+                  <div style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <DataRow label="Blood Pressure" value={patientData.summary.blood_pressure} />
+                      </div>
+                      <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <DataRow label="Blood Sugar" value={patientData.summary.blood_sugar} />
+                      </div>
+                    </div>
+                    {patientData.summary.notes && (
+                      <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <DataRow label="Notes" value={patientData.summary.notes} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

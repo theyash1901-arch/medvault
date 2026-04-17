@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiShield, FiMail, FiLock, FiEye, FiEyeOff, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
+import { FaApple } from 'react-icons/fa';
 
 export default function SignupScreen() {
-  const { signUp } = useAuth();
+  const { signUp, signInWithApple, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,6 +39,26 @@ export default function SignupScreen() {
     } else if (data?.user) {
       setSuccess('Account created! Please check your email to verify, then sign in.');
       setTimeout(() => navigate('/login'), 3000);
+    }
+    setLoading(false);
+  };
+
+  const handleAppleLogin = async () => {
+    setError('');
+    setLoading(true);
+    const { error: authError } = await signInWithApple();
+    if (authError) {
+        setError(authError.message);
+    }
+    setLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    const { error: authError } = await signInWithGoogle();
+    if (authError) {
+        setError(authError.message);
     }
     setLoading(false);
   };
@@ -146,6 +168,36 @@ export default function SignupScreen() {
             {loading ? <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span> : 'Create Account'}
           </button>
         </form>
+
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', margin: '16px 0' }}>
+            <div style={{ flex: 1, height: 1, backgroundColor: 'var(--border)' }}></div>
+            <span style={{ padding: '0 10px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>OR</span>
+            <div style={{ flex: 1, height: 1, backgroundColor: 'var(--border)' }}></div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button
+              type="button"
+              className="btn btn-outline btn-full btn-lg"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#fff', color: '#000', border: '1px solid #ddd' }}
+            >
+              <FcGoogle size={20} />
+              Continue with Google
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline btn-full btn-lg"
+              onClick={handleAppleLogin}
+              disabled={loading}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#000', color: '#fff', border: '1px solid #333' }}
+            >
+              <FaApple size={20} />
+              Continue with Apple
+            </button>
+          </div>
+        </div>
 
         <p className="auth-footer">
           Already have an account? <Link to="/login">Sign in</Link>
