@@ -4,8 +4,15 @@ import { supabase } from '../../lib/supabase';
 import { FiUser, FiBriefcase, FiAward, FiMapPin, FiSave, FiLogOut, FiCopy, FiCheck } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
+// Generate code: first 4 letters of name (uppercase) + 4 random digits
+const generateDoctorCode = (name = '') => {
+  const letters = name.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 4).padEnd(4, 'X');
+  const digits = String(Math.floor(1000 + Math.random() * 9000));
+  return `${letters}${digits}`;
+};
+
 export default function DoctorProfileScreen() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, fetchProfile } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     specialization: '',
@@ -16,19 +23,43 @@ export default function DoctorProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [copied, setCopied] = useState(false);
+  const [doctorCode, setDoctorCode] = useState(profile?.doctor_code || '');
 
   const copyDoctorCode = () => {
-    if (profile?.doctor_code) {
-      navigator.clipboard.writeText(profile.doctor_code).then(() => {
+    const code = doctorCode || profile?.doctor_code;
+    if (code) {
+      navigator.clipboard.writeText(code).then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       });
     }
   };
 
+  // Auto-generate doctor_code for existing doctors who don't have one yet
+  const ensureDoctorCode = async (currentProfile) => {
+    if (currentProfile?.doctor_code) {
+      setDoctorCode(currentProfile.doctor_code);
+      return;
+    }
+    const code = generateDoctorCode(currentProfile?.full_name || '');
+    const { error } = await supabase
+      .from('profiles')
+      .update({ doctor_code: code })
+      .eq('id', user.id);
+    if (!error) {
+      setDoctorCode(code);
+      if (fetchProfile) fetchProfile(); // refresh AuthContext profile
+    }
+  };
+
   useEffect(() => {
     loadProfile();
   }, [user]);
+
+  // Run ensureDoctorCode whenever profile loads/changes
+  useEffect(() => {
+    if (profile) ensureDoctorCode(profile);
+  }, [profile]);
 
   const loadProfile = async () => {
     setLoading(true);
@@ -127,7 +158,7 @@ export default function DoctorProfileScreen() {
                 Your MedVault Doctor ID
               </p>
               <p style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.12em', fontFamily: 'monospace' }}>
-                {profile?.doctor_code || '—'}
+                {doctorCode || <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>Generating...</span>}
               </p>
               <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.72rem', marginTop: 4 }}>
                 Share this ID with patients to grant access
