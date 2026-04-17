@@ -311,15 +311,8 @@ export default function DoctorHome() {
                 Cancel Scan
               </button>
             </div>
-            <button 
-              className="btn btn-outline btn-sm" 
-              style={{ marginTop: 16 }}
-              onClick={() => setScanning(false)}
-            >
-              Cancel Scan
-            </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Doctor Tips Card */}
         <div className="card" style={{ marginBottom: 16, background: 'rgba(0, 210, 255, 0.03)', borderColor: 'rgba(0, 210, 255, 0.1)' }}>
