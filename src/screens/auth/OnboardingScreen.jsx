@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { FiShield, FiUser, FiPhone, FiCalendar, FiHeart, FiAlertCircle } from 'react-icons/fi';
+import { FiShield, FiUser, FiPhone, FiCalendar, FiHeart, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 
 export default function OnboardingScreen() {
-  const { profile, createProfile } = useAuth();
+  const { profile, createProfile, user } = useAuth();
   const isDoctor = profile?.role === 'doctor';
 
+  // Extract Google / OAuth metadata if available
+  const oauthMeta = user?.user_metadata ?? {};
+  const googleName = oauthMeta.full_name || oauthMeta.name || '';
+  const googleAvatar = oauthMeta.avatar_url || oauthMeta.picture || '';
+  const isOAuthUser = !!googleName;
+
   const [form, setForm] = useState({
-    full_name: '',
+    full_name: googleName,
     phone: '',
     date_of_birth: '',
     gender: '',
@@ -17,6 +23,13 @@ export default function OnboardingScreen() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Re-sync if user object loads after initial render
+  useEffect(() => {
+    if (googleName) {
+      setForm(prev => ({ ...prev, full_name: prev.full_name || googleName }));
+    }
+  }, [googleName]);
 
   const updateField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -61,12 +74,31 @@ export default function OnboardingScreen() {
     <div className="auth-page" style={{ alignItems: 'flex-start', paddingTop: 40 }}>
       <div className="auth-card" style={{ maxWidth: 480 }}>
         <div className="auth-logo">
-          <div className="logo-icon">
-            <FiShield />
-          </div>
+          {googleAvatar ? (
+            <img
+              src={googleAvatar}
+              alt="Google profile"
+              style={{ width: 64, height: 64, borderRadius: '50%', marginBottom: 12, border: '3px solid var(--primary)' }}
+            />
+          ) : (
+            <div className="logo-icon"><FiShield /></div>
+          )}
           <h1>Complete Your Profile</h1>
           <p>{isDoctor ? 'Tell us about yourself, Doctor.' : 'A few details for your health record.'}</p>
         </div>
+
+        {isOAuthUser && (
+          <div className="alert" style={{
+            display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+            background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)',
+            borderRadius: 10, padding: '10px 14px', color: 'var(--text)'
+          }}>
+            <FiCheckCircle style={{ color: '#22c55e', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.85rem' }}>
+              Name auto-filled from Google. Please fill in the remaining details.
+            </span>
+          </div>
+        )}
 
         {error && (
           <div className="alert alert-error">

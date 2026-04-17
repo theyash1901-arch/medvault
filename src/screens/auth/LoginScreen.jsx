@@ -25,6 +25,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,9 +46,17 @@ export default function LoginScreen() {
 
   const handleOAuth = async (provider) => {
     setError('');
-    const { error: oauthError } = await signInWithProvider(provider);
-    if (oauthError) {
-      setError(oauthError.message);
+    setOauthLoading(provider);
+    try {
+      const { error: oauthError } = await signInWithProvider(provider);
+      if (oauthError) {
+        setError(oauthError.message);
+        setOauthLoading('');
+      }
+      // If no error, browser will redirect — keep spinner going
+    } catch (err) {
+      setError(err.message || 'OAuth login failed');
+      setOauthLoading('');
     }
   };
 
@@ -69,9 +78,12 @@ export default function LoginScreen() {
             onClick={() => handleOAuth('google')}
             className="btn btn-outline btn-full"
             style={{ padding: '12px 16px', gap: 10, fontWeight: 600 }}
+            disabled={!!oauthLoading || loading}
           >
-            <GoogleIcon />
-            Continue with Google
+            {oauthLoading === 'google'
+              ? <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
+              : <GoogleIcon />}
+            {oauthLoading === 'google' ? 'Redirecting...' : 'Continue with Google'}
           </button>
           <button
             type="button"
@@ -81,9 +93,12 @@ export default function LoginScreen() {
               padding: '12px 16px', gap: 10, fontWeight: 600,
               background: '#000', color: '#fff', border: 'none'
             }}
+            disabled={!!oauthLoading || loading}
           >
-            <AppleIcon />
-            Continue with Apple
+            {oauthLoading === 'apple'
+              ? <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2, borderTopColor: '#fff' }} />
+              : <AppleIcon />}
+            {oauthLoading === 'apple' ? 'Redirecting...' : 'Continue with Apple'}
           </button>
         </div>
 

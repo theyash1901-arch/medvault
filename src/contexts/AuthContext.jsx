@@ -112,10 +112,13 @@ export function AuthProvider({ children }) {
   };
 
   const signInWithProvider = async (provider) => {
+    if (!isSupabaseConfigured) {
+      return { data: null, error: { message: 'Supabase is not configured. Please add your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env.local file.' } };
+    }
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: window.location.origin },
+        options: { redirectTo: `${window.location.origin}/` },
       });
       return { data, error };
     } catch (err) {

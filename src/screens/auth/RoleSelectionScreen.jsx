@@ -3,11 +3,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import { FiUser, FiActivity, FiShield } from 'react-icons/fi';
 
 export default function RoleSelectionScreen() {
-  const { createProfile } = useAuth();
+  const { createProfile, user } = useAuth();
   const [selectedRole, setSelectedRole] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [debugLog, setDebugLog] = useState('');
+
+  // Grab name from Google / OAuth metadata if available
+  const oauthMeta = user?.user_metadata ?? {};
+  const googleName = oauthMeta.full_name || oauthMeta.name || '';
 
   const handleContinue = async () => {
     if (!selectedRole) return;
@@ -18,7 +22,7 @@ export default function RoleSelectionScreen() {
     try {
       const result = await createProfile({
         role: selectedRole,
-        full_name: '',
+        full_name: googleName,   // pre-fill from Google if available
       });
 
       setDebugLog(`Result: ${JSON.stringify(result).slice(0, 500)}`);
