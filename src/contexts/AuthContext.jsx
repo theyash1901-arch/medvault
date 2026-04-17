@@ -89,6 +89,13 @@ export function AuthProvider({ children }) {
     return { error };
   };
 
+  const signInWithApple = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+    });
+    return { data, error };
+  };
+
   const createProfile = async (profileData) => {
     const { data, error } = await supabase
       .from('profiles')
@@ -110,6 +117,7 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signOut,
+    signInWithApple,
     createProfile,
     fetchProfile: () => user && fetchProfile(user.id),
   };

@@ -15,6 +15,8 @@ const MedicalSummaryScreen = lazy(() => import('./screens/patient/MedicalSummary
 const QRScreen = lazy(() => import('./screens/patient/QRScreen'));
 const AccessControlScreen = lazy(() => import('./screens/patient/AccessControlScreen'));
 const AIChatScreen = lazy(() => import('./screens/patient/AIChatScreen'));
+const PrescriptionScannerScreen = lazy(() => import('./screens/patient/PrescriptionScannerScreen'));
+const HealthTimelineScreen = lazy(() => import('./screens/patient/HealthTimelineScreen'));
 const DoctorHome = lazy(() => import('./screens/doctor/DoctorHome'));
 const DoctorProfileScreen = lazy(() => import('./screens/doctor/DoctorProfileScreen'));
 
@@ -137,6 +139,8 @@ function AppRoutes() {
         <Route path="/patient/qr" element={<QRScreen />} />
         <Route path="/patient/access" element={<AccessControlScreen />} />
         <Route path="/patient/chat" element={<AIChatScreen />} />
+        <Route path="/patient/prescriptions" element={<PrescriptionScannerScreen />} />
+        <Route path="/patient/timeline" element={<HealthTimelineScreen />} />
         <Route path="*" element={<Navigate to="/patient" replace />} />
       </Routes>
       <BottomNav role="patient" />

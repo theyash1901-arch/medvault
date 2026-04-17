@@ -19,6 +19,8 @@ export default function MedicalSummaryScreen() {
   const [fetching, setFetching] = useState(true);
   const [message, setMessage] = useState({ type: '', text: '' });
 
+  const [linkedReports, setLinkedReports] = useState([]);
+
   useEffect(() => {
     fetchSummary();
   }, []);
@@ -42,10 +44,19 @@ export default function MedicalSummaryScreen() {
         });
         await offlineStore.save(`summary_${user.id}`, data);
       } else if (error && error.code === 'PGRST116') {
-        // No record yet, try offline
         const cached = await offlineStore.load(`summary_${user.id}`);
         if (cached) setFormData(cached);
       }
+      
+      // Fetch linked reports (Feature 1 requirement)
+      const { data: reports } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('patient_id', user.id)
+        .order('uploaded_at', { ascending: false })
+        .limit(3);
+      if (reports) setLinkedReports(reports);
+
     } catch {
       const cached = await offlineStore.load(`summary_${user.id}`);
       if (cached) setFormData(cached);
@@ -95,6 +106,11 @@ export default function MedicalSummaryScreen() {
       setMessage({ type: 'success', text: 'Medical summary saved!' });
     } catch {
       await offlineStore.save(`summary_${user.id}`, payload);
+      // Feature 6: Add to sync queue
+      await offlineStore.addToSyncQueue({
+        type: 'upsert_summary',
+        payload: payload
+      });
       setMessage({ type: 'error', text: 'Saved locally. Will sync when online.' });
     }
 
@@ -239,7 +255,7 @@ export default function MedicalSummaryScreen() {
             </div>
           </div>
 
-          <button
+            <button
             id="summary-save"
             type="submit"
             className="btn btn-primary btn-full btn-lg"
@@ -254,6 +270,33 @@ export default function MedicalSummaryScreen() {
             )}
           </button>
         </form>
+
+        {/* Linked Reports Display */}
+        {linkedReports.length > 0 && (
+          <div className="card" style={{ marginTop: 24 }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, color: 'var(--primary-light)' }}>
+              📄 Linked Recent Reports
+            </h3>
+            {linkedReports.map(report => (
+              <div key={report.id} className="report-item" style={{ margin: '0 -8px', marginBottom: 8 }}>
+                <div className="report-info">
+                  <h4>{report.title}</h4>
+                  <p>{new Date(report.uploaded_at).toLocaleDateString('en-IN')}</p>
+                </div>
+                {report.file_url && (
+                  <a
+                    href={report.file_url}
+                    target="_blank"
+                    rel="noopener"
+                    className="btn btn-outline btn-sm"
+                  >
+                    View
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

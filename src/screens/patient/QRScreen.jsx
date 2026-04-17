@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { offlineStore } from '../../lib/offlineStore';
 import QRCode from 'qrcode';
-import { FiMaximize, FiRefreshCw, FiInfo } from 'react-icons/fi';
+import { Scanner } from '@yudiel/react-qr-scanner';
+import { FiMaximize, FiRefreshCw, FiInfo, FiCamera, FiX } from 'react-icons/fi';
 
 export default function QRScreen() {
   const { user, profile } = useAuth();
@@ -10,6 +11,9 @@ export default function QRScreen() {
   const [emergencyData, setEmergencyData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedData, setScannedData] = useState(null);
+  const [error, setError] = useState('');
   const canvasRef = useRef();
 
   useEffect(() => {
@@ -73,6 +77,22 @@ export default function QRScreen() {
     setLoading(false);
   };
 
+  const handleQRScan = (result) => {
+    if (!result || !result.length) return;
+    try {
+      const data = JSON.parse(result[0].rawValue);
+      if (data._t !== 'medvault') {
+        setError('Invalid MedVault QR code');
+        return;
+      }
+      setScannedData(data);
+      setIsScanning(false);
+      setError('');
+    } catch {
+      setError('Could not parse QR code data.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="page">
@@ -108,94 +128,190 @@ export default function QRScreen() {
 
   return (
     <div className="page">
-      <div className="container">
-        <div className="page-header">
-          <h1>Emergency QR</h1>
-          <p>Show this to first responders in an emergency</p>
+      <div className="container" style={{ paddingBottom: 100 }}>
+        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1>Emergency QR</h1>
+            <p>Show or scan a code in an emergency</p>
+          </div>
+          <button
+            className={`btn btn-sm ${isScanning ? 'btn-outline' : 'btn-accent'}`}
+            onClick={() => { setIsScanning(!isScanning); setScannedData(null); setError(''); }}
+          >
+            {isScanning ? <FiX size={14} /> : <FiCamera size={14} />}
+            {isScanning ? ' Cancel Scan' : ' Scan QR'}
+          </button>
         </div>
 
-        {/* QR Code Display */}
-        <div className="qr-container">
-          <div className="qr-wrapper" onClick={() => setFullscreen(true)} style={{ cursor: 'pointer' }}>
-            {qrDataUrl ? (
-              <img src={qrDataUrl} alt="Emergency QR Code" style={{ width: 240, height: 240 }} />
-            ) : (
-              <div style={{ width: 240, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <p style={{ color: '#999' }}>Unable to generate QR</p>
+        {error && (
+          <div className="alert alert-error">
+            <FiInfo size={14} /> {error}
+          </div>
+        )}
+
+        {/* Scan Mode UI */}
+        {isScanning && !scannedData && (
+          <div className="card" style={{ textAlign: 'center', marginBottom: 20 }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 16 }}>
+              Scan Patient's QR Code
+            </h3>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '400px', margin: '0 auto', overflow: 'hidden', borderRadius: '12px' }}>
+              <Scanner onScan={handleQRScan} />
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 16 }}>
+              Place the MedVault QR code inside the frame to view emergency info.
+            </p>
+          </div>
+        )}
+
+        {/* Scanned Data View */}
+        {scannedData && (
+          <div style={{ animation: 'slideUp 0.3s ease', marginBottom: 20 }}>
+            <div className="card" style={{
+              borderColor: 'var(--danger)',
+              background: 'rgba(239, 68, 68, 0.05)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--danger)' }}>
+                  🚨 Emergency Info
+                </h3>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: 'var(--text-muted)' }}
+                  onClick={() => setScannedData(null)}
+                >
+                  <FiX size={18} />
+                </button>
               </div>
-            )}
-          </div>
 
-          <div className="qr-info">
-            <h3>{emergencyData?.name}</h3>
-            <p>Blood Group: <strong style={{ color: 'var(--danger)' }}>{emergencyData?.blood_group || '--'}</strong></p>
-          </div>
-
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 20 }}>
-            <button className="btn btn-primary" onClick={() => setFullscreen(true)}>
-              <FiMaximize size={14} /> Fullscreen
-            </button>
-            <button className="btn btn-outline" onClick={generateQR}>
-              <FiRefreshCw size={14} /> Refresh
-            </button>
-          </div>
-        </div>
-
-        {/* Emergency Data Preview */}
-        <div className="card" style={{ marginTop: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <FiInfo style={{ color: 'var(--primary)' }} />
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 600 }}>QR Contains</h3>
-          </div>
-
-          <div style={{ display: 'grid', gap: 12 }}>
-            <InfoRow label="Name" value={emergencyData?.name} />
-            <InfoRow label="Blood Group" value={emergencyData?.blood_group} />
-            <InfoRow label="Emergency Contact" value={
-              emergencyData?.emergency_contact
-                ? `${emergencyData.emergency_contact} (${emergencyData.emergency_phone || 'No phone'})`
-                : 'Not set'
-            } />
-
-            {emergencyData?.conditions?.length > 0 && (
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Conditions</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                  {emergencyData.conditions.map((c, i) => (
-                    <span key={i} className="tag tag-primary">{c}</span>
-                  ))}
+              <div style={{ display: 'grid', gap: 14 }}>
+                <InfoRow label="Name" value={scannedData.n} />
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.1)', padding: '12px',
+                  borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.2)'
+                }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Blood Group</span>
+                  <p style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--danger)' }}>{scannedData.bg || '--'}</p>
                 </div>
-              </div>
-            )}
+                <InfoRow label="Gender" value={scannedData.g} />
+                <InfoRow label="Emergency Contact" value={`${scannedData.ec} (${scannedData.ep})`} />
 
-            {emergencyData?.allergies?.length > 0 && (
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Allergies</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                  {emergencyData.allergies.map((a, i) => (
-                    <span key={i} className="tag tag-danger">{a}</span>
-                  ))}
-                </div>
-              </div>
-            )}
+                {scannedData.c?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Conditions</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                      {scannedData.c.map((c, i) => <span key={i} className="tag tag-primary">{c}</span>)}
+                    </div>
+                  </div>
+                )}
 
-            {emergencyData?.medications?.length > 0 && (
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Medications</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                  {emergencyData.medications.map((m, i) => (
-                    <span key={i} className="tag tag-accent">{m}</span>
-                  ))}
-                </div>
+                {scannedData.a?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>⚠️ Allergies</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                      {scannedData.a.map((a, i) => <span key={i} className="tag tag-danger">{a}</span>)}
+                    </div>
+                  </div>
+                )}
+
+                {scannedData.m?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Medications</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                      {scannedData.m.map((m, i) => <span key={i} className="tag tag-accent">{m}</span>)}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="alert alert-info" style={{ marginTop: 16 }}>
-          <FiInfo size={14} />
-          <span style={{ fontSize: '0.8rem' }}>This QR code works offline. Data is stored on your device.</span>
-        </div>
+        {/* My QR Mode UI (Only show if not scanning and not viewing scan result) */}
+        {!isScanning && !scannedData && (
+          <>
+            <div className="qr-container">
+              <div className="qr-wrapper" onClick={() => setFullscreen(true)} style={{ cursor: 'pointer' }}>
+                {qrDataUrl ? (
+                  <img src={qrDataUrl} alt="Emergency QR Code" style={{ width: 240, height: 240 }} />
+                ) : (
+                  <div style={{ width: 240, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <p style={{ color: '#999' }}>Unable to generate QR</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="qr-info">
+                <h3>{emergencyData?.name}</h3>
+                <p>Blood Group: <strong style={{ color: 'var(--danger)' }}>{emergencyData?.blood_group || '--'}</strong></p>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 20 }}>
+                <button className="btn btn-primary" onClick={() => setFullscreen(true)}>
+                  <FiMaximize size={14} /> Fullscreen
+                </button>
+                <button className="btn btn-outline" onClick={generateQR}>
+                  <FiRefreshCw size={14} /> Refresh
+                </button>
+              </div>
+            </div>
+
+            <div className="card" style={{ marginTop: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <FiInfo style={{ color: 'var(--primary)' }} />
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 600 }}>My QR Contains</h3>
+              </div>
+
+              <div style={{ display: 'grid', gap: 12 }}>
+                <InfoRow label="Name" value={emergencyData?.name} />
+                <InfoRow label="Blood Group" value={emergencyData?.blood_group} />
+                <InfoRow label="Emergency Contact" value={
+                  emergencyData?.emergency_contact
+                    ? `${emergencyData.emergency_contact} (${emergencyData.emergency_phone || 'No phone'})`
+                    : 'Not set'
+                } />
+
+                {emergencyData?.conditions?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Conditions</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                      {emergencyData.conditions.map((c, i) => (
+                        <span key={i} className="tag tag-primary">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {emergencyData?.allergies?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Allergies</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                      {emergencyData.allergies.map((a, i) => (
+                        <span key={i} className="tag tag-danger">{a}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {emergencyData?.medications?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Medications</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                      {emergencyData.medications.map((m, i) => (
+                        <span key={i} className="tag tag-accent">{m}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="alert alert-info" style={{ marginTop: 16 }}>
+              <FiInfo size={14} />
+              <span style={{ fontSize: '0.8rem' }}>This QR code works offline. Data is stored on your device.</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
