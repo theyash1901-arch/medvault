@@ -92,14 +92,13 @@ function AppRoutes() {
     return <SetupScreen />;
   }
 
-  // Not logged in — show welcome page first
+  // Not logged in
   if (!user) {
     return (
       <Routes>
-        <Route path="/" element={<WelcomeScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/signup" element={<SignupScreen />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
