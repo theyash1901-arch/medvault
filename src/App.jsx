@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import BottomNav from './components/BottomNav';
+import Navbar from './components/Navbar';
 import OfflineBanner from './components/OfflineBanner';
 
 // Lazy-loaded routes
@@ -27,10 +27,8 @@ const FastSpinner = () => (
   </div>
 );
 
-
-
 function AppRoutes() {
-  const { user, profile, loading, isConfigured } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -40,8 +38,6 @@ function AppRoutes() {
       </div>
     );
   }
-
-
 
   // Not logged in
   if (!user) {
@@ -67,37 +63,41 @@ function AppRoutes() {
   // Doctor routes
   if (profile.role === 'doctor') {
     return (
-      <>
-        <OfflineBanner />
-        <Routes>
-          <Route path="/doctor" element={<DoctorHome />} />
-          <Route path="/doctor/profile" element={<DoctorProfileScreen />} />
-          <Route path="*" element={<Navigate to="/doctor" replace />} />
-        </Routes>
-        <BottomNav role="doctor" />
-      </>
+      <div className="app-layout">
+        <Navbar role="doctor" />
+        <div className="app-content">
+          <OfflineBanner />
+          <Routes>
+            <Route path="/doctor" element={<DoctorHome />} />
+            <Route path="/doctor/profile" element={<DoctorProfileScreen />} />
+            <Route path="*" element={<Navigate to="/doctor" replace />} />
+          </Routes>
+        </div>
+      </div>
     );
   }
 
   // Patient routes
   return (
-    <>
-      <OfflineBanner />
-      <Routes>
-        <Route path="/patient" element={<PatientHome />} />
-        <Route path="/patient/profile" element={<ProfileScreen />} />
-        <Route path="/patient/reports" element={<ReportsScreen />} />
-        <Route path="/patient/summary" element={<MedicalSummaryScreen />} />
-        <Route path="/patient/qr" element={<QRScreen />} />
-        <Route path="/patient/access" element={<AccessControlScreen />} />
-        <Route path="/patient/chat" element={<AIChatScreen />} />
-        <Route path="/patient/prescriptions" element={<PrescriptionScannerScreen />} />
-        <Route path="/patient/timeline" element={<HealthTimelineScreen />} />
-        <Route path="/patient/reminders" element={<RemindersScreen />} />
-        <Route path="*" element={<Navigate to="/patient" replace />} />
-      </Routes>
-      <BottomNav role="patient" />
-    </>
+    <div className="app-layout">
+      <Navbar role="patient" />
+      <div className="app-content">
+        <OfflineBanner />
+        <Routes>
+          <Route path="/patient" element={<PatientHome />} />
+          <Route path="/patient/profile" element={<ProfileScreen />} />
+          <Route path="/patient/reports" element={<ReportsScreen />} />
+          <Route path="/patient/summary" element={<MedicalSummaryScreen />} />
+          <Route path="/patient/qr" element={<QRScreen />} />
+          <Route path="/patient/access" element={<AccessControlScreen />} />
+          <Route path="/patient/chat" element={<AIChatScreen />} />
+          <Route path="/patient/prescriptions" element={<PrescriptionScannerScreen />} />
+          <Route path="/patient/timeline" element={<HealthTimelineScreen />} />
+          <Route path="/patient/reminders" element={<RemindersScreen />} />
+          <Route path="*" element={<Navigate to="/patient" replace />} />
+        </Routes>
+      </div>
+    </div>
   );
 }
 

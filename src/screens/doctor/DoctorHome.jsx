@@ -450,7 +450,7 @@ export default function DoctorHome() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
                           {patientData.summary.current_medications.map((m, i) => (
                             <div key={i} style={{
-                              padding: '10px 14px', background: 'rgba(255,255,255,0.03)',
+                              padding: '10px 14px', background: 'var(--bg-primary)',
                               borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
                               fontSize: '0.9rem', fontWeight: 500
                             }}>
@@ -464,15 +464,15 @@ export default function DoctorHome() {
                   
                   <div style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                      <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                      <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
                         <DataRow label="Blood Pressure" value={patientData.summary.blood_pressure} />
                       </div>
-                      <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                      <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
                         <DataRow label="Blood Sugar" value={patientData.summary.blood_sugar} />
                       </div>
                     </div>
                     {patientData.summary.notes && (
-                      <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                      <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
                         <DataRow label="Notes" value={patientData.summary.notes} />
                       </div>
                     )}

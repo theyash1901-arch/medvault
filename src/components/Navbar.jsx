@@ -1,65 +1,65 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sparkles } from 'lucide-react';
-import './Navbar.css';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { FiHome, FiFileText, FiHeart, FiMaximize, FiUser, FiSearch, FiMessageCircle, FiLogOut } from 'react-icons/fi';
 
-export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+export default function Navbar({ role }) {
   const location = useLocation();
-  const navRef = useRef(null);
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const handleSignOut = async () => {
+    if (confirm('Sign out of MedVault?')) {
+      await signOut();
+      navigate('/login');
+    }
+  };
 
-  useEffect(() => {
-    setIsMobileOpen(false);
-  }, [location]);
-
-  const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/analyze', label: 'Analyze' },
-    { path: '/match', label: 'Job Match' },
-    { path: '/dashboard', label: 'Dashboard' },
+  const patientLinks = [
+    { path: '/patient', icon: <FiHome />, label: 'Dashboard' },
+    { path: '/patient/reports', icon: <FiFileText />, label: 'Reports' },
+    { path: '/patient/qr', icon: <FiMaximize />, label: 'Emergency QR' },
+    { path: '/patient/chat', icon: <FiMessageCircle />, label: 'AI Chat' },
   ];
 
-  return (
-    <nav ref={navRef} className={`navbar ${isScrolled ? 'navbar-scrolled' : ''}`}>
-      <div className="container navbar-container">
-        <Link to="/" className="navbar-brand">
-          <div className="navbar-logo">
-            <Sparkles size={24} />
-          </div>
-          <span className="navbar-brand-text">
-            Talent<span className="text-gradient">Lens</span> AI
-          </span>
-        </Link>
+  const doctorLinks = [
+    { path: '/doctor', icon: <FiHome />, label: 'Dashboard' },
+  ];
 
-        <div className={`navbar-links ${isMobileOpen ? 'navbar-links-open' : ''}`}>
-          {navLinks.map(link => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`navbar-link ${location.pathname === link.path ? 'navbar-link-active' : ''}`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Link to="/analyze" className="btn btn-primary btn-sm navbar-cta">
-            Get Started
-          </Link>
+  const links = role === 'doctor' ? doctorLinks : patientLinks;
+  const profilePath = role === 'doctor' ? '/doctor/profile' : '/patient/profile';
+
+  return (
+    <nav className="top-navbar">
+      <div className="navbar-container">
+        <div className="navbar-brand" onClick={() => navigate(role === 'doctor' ? '/doctor' : '/patient')}>
+          <span className="brand-icon">⚕️</span>
+          <span className="brand-text">MedVault</span>
         </div>
 
-        <button
-          className="navbar-toggle"
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          aria-label="Toggle navigation"
-        >
-          {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="navbar-links">
+          {links.map(link => (
+            <button
+              key={link.path}
+              className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
+              onClick={() => navigate(link.path)}
+            >
+              {link.icon} <span>{link.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="navbar-actions">
+          <button
+            className={`nav-link ${location.pathname === profilePath ? 'active' : ''}`}
+            onClick={() => navigate(profilePath)}
+            title="Profile"
+          >
+            <FiUser />
+          </button>
+          <button className="nav-link text-danger" onClick={handleSignOut} title="Sign Out">
+            <FiLogOut />
+          </button>
+        </div>
       </div>
     </nav>
   );
