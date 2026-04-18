@@ -24,8 +24,8 @@ export default function DoctorProfileScreen() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('doctor_profiles')
-        .select('*')
+        .from('profiles')
+        .select('specialization, license_number, hospital_clinic')
         .eq('id', user.id)
         .single();
         
@@ -37,7 +37,7 @@ export default function DoctorProfileScreen() {
         });
       }
     } catch (err) {
-      // Table might be initially empty
+      // Profile might not have these fields yet
     }
     setLoading(false);
   };
@@ -57,8 +57,8 @@ export default function DoctorProfileScreen() {
       };
 
       const { error } = await supabase
-        .from('doctor_profiles')
-        .upsert(payload);
+        .from('profiles')
+        .upsert(payload, { onConflict: 'id' });
 
       if (error) throw error;
       setMessage('Profile updated successfully!');
