@@ -240,6 +240,24 @@ export default function PatientHome() {
             </div>
           </Link>
 
+          <Link to="/patient/reminders" style={{ textDecoration: 'none' }}>
+            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: 'var(--radius-md)',
+                background: 'rgba(59, 130, 246, 0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <FiClock style={{ color: '#3b82f6', width: 22, height: 22 }} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>Medication Reminders</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Set daily alarms for your pills
+                </p>
+              </div>
+            </div>
+          </Link>
+
           <Link to="/patient/profile" style={{ textDecoration: 'none' }}>
             <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}>
               <div style={{

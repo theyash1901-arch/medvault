@@ -17,6 +17,7 @@ const AccessControlScreen = lazy(() => import('./screens/patient/AccessControlSc
 const AIChatScreen = lazy(() => import('./screens/patient/AIChatScreen'));
 const PrescriptionScannerScreen = lazy(() => import('./screens/patient/PrescriptionScannerScreen'));
 const HealthTimelineScreen = lazy(() => import('./screens/patient/HealthTimelineScreen'));
+const RemindersScreen = lazy(() => import('./screens/patient/RemindersScreen'));
 const DoctorHome = lazy(() => import('./screens/doctor/DoctorHome'));
 const DoctorProfileScreen = lazy(() => import('./screens/doctor/DoctorProfileScreen'));
 
@@ -26,53 +27,7 @@ const FastSpinner = () => (
   </div>
 );
 
-function SetupScreen() {
-  return (
-    <div className="auth-page">
-      <div className="auth-card" style={{ maxWidth: 460 }}>
-        <div className="auth-logo">
-          <div className="logo-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-          </div>
-          <h1>MedVault</h1>
-          <p>Your health records, secured.</p>
-        </div>
 
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 12, color: 'var(--warning)' }}>
-            ⚙️ Supabase Setup Required
-          </h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.6 }}>
-            To get started, you need to create a free Supabase project and add your credentials.
-          </p>
-          <ol style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingLeft: 20, lineHeight: 2 }}>
-            <li>Go to <a href="https://supabase.com" target="_blank" rel="noopener" style={{ color: 'var(--primary)' }}>supabase.com</a> and create a free project</li>
-            <li>Go to <strong>Settings → API</strong> and copy your project URL and anon key</li>
-            <li>Open <code style={{ background: 'var(--bg-elevated)', padding: '2px 6px', borderRadius: 4, fontSize: '0.8rem' }}>.env</code> in the project root</li>
-            <li>Replace the placeholder values with your real credentials</li>
-            <li>Run the SQL from <code style={{ background: 'var(--bg-elevated)', padding: '2px 6px', borderRadius: 4, fontSize: '0.8rem' }}>supabase-schema.sql</code> in the SQL Editor</li>
-            <li>Restart the dev server</li>
-          </ol>
-        </div>
-
-        <div className="card" style={{ background: 'rgba(14, 165, 233, 0.05)', borderColor: 'rgba(14, 165, 233, 0.2)' }}>
-          <h4 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 8, color: 'var(--primary-light)' }}>
-            📋 .env file format
-          </h4>
-          <pre style={{
-            fontSize: '0.75rem', color: 'var(--accent-light)', background: 'var(--bg-primary)',
-            padding: 12, borderRadius: 8, overflowX: 'auto', lineHeight: 1.8
-          }}>
-{`VITE_SUPABASE_URL=https://abc123.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOi...`}
-          </pre>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function AppRoutes() {
   const { user, profile, loading, isConfigured } = useAuth();
@@ -86,10 +41,7 @@ function AppRoutes() {
     );
   }
 
-  // Supabase not configured
-  if (!isConfigured) {
-    return <SetupScreen />;
-  }
+
 
   // Not logged in
   if (!user) {
@@ -141,6 +93,7 @@ function AppRoutes() {
         <Route path="/patient/chat" element={<AIChatScreen />} />
         <Route path="/patient/prescriptions" element={<PrescriptionScannerScreen />} />
         <Route path="/patient/timeline" element={<HealthTimelineScreen />} />
+        <Route path="/patient/reminders" element={<RemindersScreen />} />
         <Route path="*" element={<Navigate to="/patient" replace />} />
       </Routes>
       <BottomNav role="patient" />

@@ -69,35 +69,61 @@ export default function ReportsScreen() {
     try {
       const fileExt = uploadData.file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      let publicUrl = '';
+      let reportObj = null;
 
-      // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('reports')
-        .upload(fileName, uploadData.file);
+      // Try Upload to Supabase Storage
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from('reports')
+          .upload(fileName, uploadData.file);
 
-      if (uploadError) throw uploadError;
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from('reports').getPublicUrl(fileName);
+          publicUrl = urlData.publicUrl;
+        }
+      } catch (uploadFail) {
+        console.warn('Storage upload failed, continuing locally', uploadFail);
+      }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('reports')
-        .getPublicUrl(fileName);
+      // Try Save metadata
+      try {
+        const { data: dbReport, error: dbError } = await supabase
+          .from('reports')
+          .insert({
+            patient_id: user.id,
+            title: uploadData.title,
+            report_type: uploadData.report_type,
+            file_url: publicUrl,
+            file_name: uploadData.file.name,
+            uploaded_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
 
-      // Save metadata
-      const { data: report, error: dbError } = await supabase
-        .from('reports')
-        .insert({
+        if (!dbError) reportObj = dbReport;
+      } catch (dbFail) {
+        console.warn('DB insert failed, continuing locally', dbFail);
+      }
+
+      // If backend failed, mock report object
+      if (!reportObj) {
+        const { base64, mimeType } = await fileToBase64(uploadData.file);
+        publicUrl = `data:${mimeType};base64,${base64}`;
+        reportObj = {
+          id: 'local-' + Date.now(),
           patient_id: user.id,
           title: uploadData.title,
           report_type: uploadData.report_type,
           file_url: publicUrl,
           file_name: uploadData.file.name,
           uploaded_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
+        };
+      }
 
-      if (dbError) throw dbError;
-
-      setReports(prev => [report, ...prev]);
+      const updatedReports = [reportObj, ...reports];
+      setReports(updatedReports);
+      await offlineStore.save(`reports_${user.id}`, updatedReports);
 
       // Perform AI Analysis automatically
       setAnalyzing(true);
@@ -106,11 +132,13 @@ export default function ReportsScreen() {
         const aiData = await analyzeMedicalReport(base64, mimeType);
         
         // Fetch current summary to merge
-        const { data: curSummary } = await supabase
-          .from('medical_summaries')
-          .select('*')
-          .eq('patient_id', user.id)
-          .single();
+        let curSummary = null;
+        try {
+          const { data } = await supabase.from('medical_summaries').select('*').eq('patient_id', user.id).single();
+          curSummary = data;
+        } catch (e) {
+          curSummary = await offlineStore.load(`dashboard_summary_${user.id}`);
+        }
           
         const newConditions = [...new Set([...(curSummary?.conditions || []), ...(aiData.conditions || [])])];
         const newAllergies = [...new Set([...(curSummary?.allergies || []), ...(aiData.allergies || [])])];
@@ -124,8 +152,13 @@ export default function ReportsScreen() {
           updated_at: new Date().toISOString()
         };
 
-        await supabase.from('medical_summaries').upsert(mergedSummary, { onConflict: 'patient_id' });
+        try {
+          await supabase.from('medical_summaries').upsert(mergedSummary, { onConflict: 'patient_id' });
+        } catch (e) {
+          console.warn('Upsert failed, saving locally');
+        }
         
+        await offlineStore.save(`dashboard_summary_${user.id}`, mergedSummary);
         if (profile) {
           await offlineStore.saveEmergencyData(profile, mergedSummary);
         }
