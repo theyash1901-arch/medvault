@@ -201,22 +201,21 @@ export default function DoctorHome() {
   };
 
   return (
-    <div className="page">
-      <div className="container">
-        <div className="page-header" style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-            🩺 Doctor Dashboard
-          </p>
-          <h1>Welcome, Dr. {displayName.split(' ').pop()}</h1>
-        </div>
+    <div className="container">
+      <div className="page-header mb-8">
+        <p className="text-sm text-slate-500 font-medium mb-1">
+          🩺 Doctor Dashboard
+        </p>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Welcome, Dr. {displayName.split(' ').pop()}</h1>
+      </div>
 
-        {/* Search Patient */}
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FiSearch style={{ color: 'var(--primary)' }} />
-            Find Patient
-          </h3>
-          <form onSubmit={searchPatient} style={{ display: 'flex', gap: 10 }}>
+      {/* Search Patient */}
+      <div className="card mb-6">
+        <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+          <FiSearch className="text-blue-600" />
+          Find Patient
+        </h3>
+        <form onSubmit={searchPatient} className="flex gap-3">
             <input
               id="search-patient"
               className="form-input"
@@ -231,51 +230,50 @@ export default function DoctorHome() {
           </form>
         </div>
 
-        {/* Scan QR Button */}
-        <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
-          <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 8 }}>Quick Emergency Access</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
-            Scan a patient's emergency QR code to view critical info instantly
-          </p>
+      {/* Scan QR Button */}
+      <div className="card mb-6 text-center">
+        <h3 className="text-base font-semibold text-slate-800 mb-2">Quick Emergency Access</h3>
+        <p className="text-sm text-slate-500 mb-5">
+          Scan a patient's emergency QR code to view critical info instantly
+        </p>
           
-          {!scanning ? (
-            <button
-              id="btn-scan-qr"
-              className="btn btn-accent btn-lg"
-              onClick={() => setScanning(true)}
-            >
-              <FiMaximize size={16} /> Open Camera Scanner
-            </button>
-          ) : (
-            <div style={{ position: 'relative' }}>
-              <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', overflow: 'hidden', borderRadius: '12px' }}>
-                <Scanner onScan={handleQRScan} />
-              </div>
-              <button 
-                className="btn btn-outline btn-sm" 
-                style={{ marginTop: 16 }}
-                onClick={() => setScanning(false)}
-              >
-                Cancel Scan
-              </button>
+        {!scanning ? (
+          <button
+            id="btn-scan-qr"
+            className="btn btn-accent btn-lg"
+            onClick={() => setScanning(true)}
+          >
+            <FiMaximize size={16} /> Open Camera Scanner
+          </button>
+        ) : (
+          <div className="relative">
+            <div className="w-full max-w-sm mx-auto overflow-hidden rounded-xl shadow-inner border border-slate-200">
+              <Scanner onScan={handleQRScan} />
             </div>
-          )}
-        </div>
+            <button 
+              className="btn btn-outline btn-sm mt-4" 
+              onClick={() => setScanning(false)}
+            >
+              Cancel Scan
+            </button>
+          </div>
+        )}
+      </div>
 
         {/* Granted Patients List */}
         {!patientData && !scannedData && (
-          <div style={{ marginBottom: 16 }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FiShield style={{ color: 'var(--accent)' }} />
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <FiShield className="text-emerald-600" />
               Your Patients ({grantedPatients.length})
             </h3>
             {loadingPatients ? (
-              <div style={{ textAlign: 'center', paddingTop: 20 }}>
-                <div className="spinner" style={{ margin: '0 auto' }}></div>
+              <div className="text-center py-6">
+                <div className="spinner mx-auto"></div>
               </div>
             ) : grantedPatients.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              <div className="card text-center p-8 border-dashed">
+                <p className="text-sm text-slate-500">
                   No patients have granted you access yet
                 </p>
               </div>
@@ -283,31 +281,23 @@ export default function DoctorHome() {
               grantedPatients.map(grant => (
                 <div
                   key={grant.patient_id}
-                  className="card"
-                  style={{ padding: '14px 18px', marginBottom: 8, cursor: 'pointer' }}
+                  className="card p-4 mb-3 flex items-center gap-4 cursor-pointer hover:border-blue-300 transition-colors"
                   onClick={() => viewPatientById(grant.patient_id)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'white', fontWeight: 700, fontSize: '1rem', flexShrink: 0
-                    }}>
-                      {(grant.patient?.full_name || '?')[0].toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <h4 style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                        {grant.patient?.full_name || 'Unknown'}
-                      </h4>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {grant.patient?.blood_group && `${grant.patient.blood_group} • `}
-                        {grant.patient?.gender || ''}
-                        {grant.expires_at && ` • ⏰ ${getExpiryLabel(grant.expires_at)}`}
-                      </p>
-                    </div>
-                    <FiUser style={{ color: 'var(--text-muted)' }} />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-emerald-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                    {(grant.patient?.full_name || '?')[0].toUpperCase()}
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-semibold text-slate-900 truncate">
+                      {grant.patient?.full_name || 'Unknown'}
+                    </h4>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                      {grant.patient?.blood_group && `${grant.patient.blood_group} • `}
+                      {grant.patient?.gender || ''}
+                      {grant.expires_at && ` • ⏰ ${getExpiryLabel(grant.expires_at)}`}
+                    </p>
+                  </div>
+                  <FiUser className="text-slate-400 shrink-0" />
                 </div>
               ))
             )}
@@ -323,17 +313,13 @@ export default function DoctorHome() {
 
         {/* Scanned QR Emergency View */}
         {scannedData && (
-          <div style={{ animation: 'slideUp 0.3s ease' }}>
-            <div className="card" style={{
-              marginBottom: 16,
-              borderColor: 'var(--danger)',
-              background: 'rgba(239, 68, 68, 0.05)'
-            }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--danger)', marginBottom: 16 }}>
+          <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
+            <div className="card mb-6 border-red-200 bg-red-50/30">
+              <h3 className="text-lg font-bold text-red-600 mb-4 flex items-center gap-2">
                 🚨 Emergency Patient Info
               </h3>
 
-              <div style={{ display: 'grid', gap: 14 }}>
+              <div className="flex flex-col gap-4">
                 <DataRow label="Name" value={scannedData.n} />
                 <DataRow label="Blood Group" value={scannedData.bg} highlight />
                 <DataRow label="Gender" value={scannedData.g} />
@@ -341,8 +327,8 @@ export default function DoctorHome() {
 
                 {scannedData.c?.length > 0 && (
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Conditions</span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                    <span className="text-xs text-slate-500 font-medium">Conditions</span>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
                       {scannedData.c.map((c, i) => <span key={i} className="tag tag-primary">{c}</span>)}
                     </div>
                   </div>
@@ -350,8 +336,8 @@ export default function DoctorHome() {
 
                 {scannedData.a?.length > 0 && (
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>⚠️ Allergies</span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                    <span className="text-xs text-slate-500 font-medium">⚠️ Allergies</span>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
                       {scannedData.a.map((a, i) => <span key={i} className="tag tag-danger">{a}</span>)}
                     </div>
                   </div>
@@ -359,15 +345,15 @@ export default function DoctorHome() {
 
                 {scannedData.m?.length > 0 && (
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Medications</span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                    <span className="text-xs text-slate-500 font-medium">Medications</span>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
                       {scannedData.m.map((m, i) => <span key={i} className="tag tag-accent">{m}</span>)}
                     </div>
                   </div>
                 )}
               </div>
             </div>
-            <button className="btn btn-outline btn-full" onClick={() => setScannedData(null)}>
+            <button className="btn btn-outline btn-full bg-white" onClick={() => setScannedData(null)}>
               Clear
             </button>
           </div>
@@ -375,34 +361,29 @@ export default function DoctorHome() {
 
         {/* Full Patient View (when searched with access) */}
         {patientData && (
-          <div style={{ animation: 'slideUp 0.3s ease' }}>
+          <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
             {/* Patient Info Header */}
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-                <div style={{
-                  width: 50, height: 50, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'white', fontWeight: 700, fontSize: '1.2rem'
-                }}>
+            <div className="card mb-4 border-slate-200">
+              <div className="flex items-center gap-4 mb-5">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-emerald-500 flex items-center justify-center text-white font-bold text-xl shrink-0">
                   {(patientData.full_name || '?')[0].toUpperCase()}
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>{patientData.full_name}</h3>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <h3 className="text-lg font-bold text-slate-900">{patientData.full_name}</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
                     {patientData.gender} • {patientData.blood_group} • {patientData.date_of_birth}
                   </p>
                 </div>
               </div>
 
-              <div className="grid-desktop-only" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <DataRow label="Phone" value={patientData.phone} />
                 <DataRow label="Emergency Contact" value={patientData.emergency_contact_name} />
               </div>
             </div>
 
             {/* Tab Navigation */}
-            <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto' }}>
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
               {[
                 { key: 'summary', label: 'Summary', icon: <FiHeart size={14} /> },
                 { key: 'reports', label: `Reports (${patientReports.length})`, icon: <FiFileText size={14} /> },
@@ -420,40 +401,36 @@ export default function DoctorHome() {
             </div>
 
             {activeTab === 'summary' && patientData.summary && (
-              <div className="card" style={{ marginBottom: 16 }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FiHeart style={{ color: 'var(--danger)' }} />
+              <div className="card mb-4 border-slate-200">
+                <h3 className="text-base font-bold text-slate-800 mb-5 flex items-center gap-2">
+                  <FiHeart className="text-red-500" />
                   Medical Summary
                 </h3>
 
-                <div className="grid-desktop-only" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                  <div style={{ display: 'grid', gap: 16 }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex flex-col gap-5">
                     {patientData.summary.conditions?.length > 0 && (
                       <div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Conditions</span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Conditions</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
                           {patientData.summary.conditions.map((c, i) => <span key={i} className="tag tag-primary">{c}</span>)}
                         </div>
                       </div>
                     )}
                     {patientData.summary.allergies?.length > 0 && (
                       <div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>⚠️ Allergies</span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">⚠️ Allergies</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
                           {patientData.summary.allergies.map((a, i) => <span key={i} className="tag tag-danger">{a}</span>)}
                         </div>
                       </div>
                     )}
                     {patientData.summary.current_medications?.length > 0 && (
                       <div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>💊 Medications</span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">💊 Medications</span>
+                        <div className="flex flex-col gap-2 mt-2">
                           {patientData.summary.current_medications.map((m, i) => (
-                            <div key={i} style={{
-                              padding: '10px 14px', background: 'var(--bg-primary)',
-                              borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
-                              fontSize: '0.9rem', fontWeight: 500
-                            }}>
+                            <div key={i} className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                               {m}
                             </div>
                           ))}
@@ -462,17 +439,17 @@ export default function DoctorHome() {
                     )}
                   </div>
                   
-                  <div style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                      <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                  <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                         <DataRow label="Blood Pressure" value={patientData.summary.blood_pressure} />
                       </div>
-                      <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                         <DataRow label="Blood Sugar" value={patientData.summary.blood_sugar} />
                       </div>
                     </div>
                     {patientData.summary.notes && (
-                      <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                         <DataRow label="Notes" value={patientData.summary.notes} />
                       </div>
                     )}
@@ -489,64 +466,58 @@ export default function DoctorHome() {
 
             {/* Reports Tab */}
             {activeTab === 'reports' && (
-              <div className="card">
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FiFileText style={{ color: 'var(--primary)' }} />
+              <div className="card mb-4 border-slate-200">
+                <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                  <FiFileText className="text-blue-600" />
                   Reports ({patientReports.length})
                 </h3>
 
                 {patientReports.length === 0 ? (
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No reports uploaded</p>
+                  <p className="text-sm text-slate-500">No reports uploaded</p>
                 ) : (
-                  patientReports.map(report => (
-                    <div key={report.id} className="report-item" style={{ margin: '0 -8px', marginBottom: 8 }}>
-                      <div className="report-info">
-                        <h4>{report.title}</h4>
-                        <p>{new Date(report.uploaded_at).toLocaleDateString('en-IN', {
-                          day: 'numeric', month: 'short', year: 'numeric'
-                        })}</p>
+                  <div className="flex flex-col gap-3">
+                    {patientReports.map(report => (
+                      <div key={report.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div>
+                          <h4 className="text-sm font-semibold text-slate-900">{report.title}</h4>
+                          <p className="text-xs text-slate-500">{new Date(report.uploaded_at).toLocaleDateString('en-IN', {
+                            day: 'numeric', month: 'short', year: 'numeric'
+                          })}</p>
+                        </div>
+                        {report.file_url && (
+                          <a href={report.file_url} target="_blank" rel="noopener" className="btn btn-outline btn-sm bg-white">
+                            View
+                          </a>
+                        )}
                       </div>
-                      {report.file_url && (
-                        <a
-                          href={report.file_url}
-                          target="_blank"
-                          rel="noopener"
-                          className="btn btn-outline btn-sm"
-                        >
-                          View
-                        </a>
-                      )}
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
             )}
 
             {/* Timeline Tab */}
             {activeTab === 'timeline' && (
-              <div className="card">
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FiClock style={{ color: '#C084FC' }} />
+              <div className="card mb-4 border-slate-200">
+                <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                  <FiClock className="text-purple-500" />
                   Health Timeline
                 </h3>
 
                 {patientTimeline.length === 0 ? (
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No timeline events</p>
+                  <p className="text-sm text-slate-500">No timeline events</p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div className="flex flex-col gap-3">
                     {patientTimeline.map(event => (
-                      <div key={event.id} style={{
-                        padding: '10px 14px', background: 'rgba(255,255,255,0.02)',
-                        borderRadius: 'var(--radius-sm)', borderLeft: `3px solid var(--primary)`
-                      }}>
-                        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 2 }}>
+                      <div key={event.id} className="p-3 bg-slate-50 rounded-xl border-l-4 border-l-purple-500 shadow-sm">
+                        <p className="text-xs font-medium text-slate-400 mb-1">
                           {new Date(event.event_date).toLocaleDateString('en-IN', {
                             day: 'numeric', month: 'short', year: 'numeric'
                           })}
                         </p>
-                        <h4 style={{ fontSize: '0.85rem', fontWeight: 600 }}>{event.title}</h4>
+                        <h4 className="text-sm font-semibold text-slate-900">{event.title}</h4>
                         {event.description && (
-                          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                          <p className="text-xs text-slate-500 mt-1">
                             {event.description}
                           </p>
                         )}
@@ -558,8 +529,7 @@ export default function DoctorHome() {
             )}
 
             <button
-              className="btn btn-outline btn-full"
-              style={{ marginTop: 16 }}
+              className="btn btn-outline w-full mt-4 bg-white"
               onClick={() => { setPatientData(null); setSearchId(''); }}
             >
               Back to Dashboard
@@ -574,12 +544,8 @@ export default function DoctorHome() {
 function DataRow({ label, value, highlight }) {
   return (
     <div>
-      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{label}</span>
-      <p style={{
-        fontSize: '0.9rem',
-        fontWeight: highlight ? 700 : 500,
-        color: highlight ? 'var(--danger)' : 'var(--text-primary)'
-      }}>
+      <span className="text-xs text-slate-500 font-medium">{label}</span>
+      <p className={`text-sm mt-0.5 ${highlight ? 'font-bold text-red-600' : 'font-semibold text-slate-800'}`}>
         {value || '--'}
       </p>
     </div>

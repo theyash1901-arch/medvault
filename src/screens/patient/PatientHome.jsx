@@ -10,6 +10,9 @@ export default function PatientHome() {
   const displayName = profile?.full_name || 'Patient';
   const greeting = getGreeting();
   const [recentReports, setRecentReports] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [reportCount, setReportCount] = useState(0);
 
   useEffect(() => {
     loadDashboardData();
@@ -61,94 +64,98 @@ export default function PatientHome() {
   return (
     <div className="container">
       <div className="page-header">
-        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 4 }}>{greeting}</p>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+        <p className="text-sm text-slate-500 font-medium mb-1">{greeting}</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
           {displayName === 'Patient' ? 'Welcome back' : `${displayName}`}
         </h1>
       </div>
 
       {(!profile?.full_name || !profile?.blood_group) && (
-        <div className="alert alert-warning" style={{ background: '#fffbeb', color: '#b45309', borderColor: '#fef3c7' }}>
-          <FiAlertTriangle />
-          <span>Complete your profile for better emergency QR codes. <Link to="/patient/profile" style={{ color: '#b45309', textDecoration: 'underline' }}>Fix now</Link></span>
+        <div className="alert bg-amber-50 border border-amber-200 text-amber-800">
+          <FiAlertTriangle className="text-amber-600" />
+          <span>Complete your profile for better emergency QR codes. <Link to="/patient/profile" className="font-semibold underline hover:text-amber-900">Fix now</Link></span>
         </div>
       )}
 
       {/* Top: Medical Summary */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Medical Summary</h2>
-          <Link to="/patient/summary" className="btn btn-ghost btn-sm" style={{ color: 'var(--primary)' }}>View All</Link>
+      <div className="mb-10">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-slate-800 tracking-tight">Medical Summary</h2>
+          <Link to="/patient/summary" className="btn btn-ghost btn-sm text-blue-600">View All</Link>
         </div>
         
         {loading ? (
-           <div className="card text-center"><div className="spinner" style={{ margin: '0 auto' }}></div></div>
+           <div className="card text-center py-8"><div className="spinner mx-auto"></div></div>
         ) : summary && (conditionsCount + allergiesCount + medsCount > 0) ? (
-          <div className="card" style={{ borderLeft: '4px solid var(--primary)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, textAlign: 'center' }}>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{conditionsCount}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Conditions</div>
+          <div className="card border-l-4 border-l-blue-600 p-6">
+            <div className="grid grid-cols-3 gap-4 text-center divide-x divide-slate-200">
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-3xl font-bold text-slate-800 mb-1">{conditionsCount}</div>
+                <div className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-semibold">Conditions</div>
               </div>
-              <div style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{allergiesCount}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Allergies</div>
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-3xl font-bold text-slate-800 mb-1">{allergiesCount}</div>
+                <div className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-semibold">Allergies</div>
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{medsCount}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Medications</div>
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-3xl font-bold text-slate-800 mb-1">{medsCount}</div>
+                <div className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-semibold">Medications</div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="card text-center" style={{ padding: '32px 20px' }}>
-            <FiActivity size={32} style={{ color: 'var(--text-muted)', margin: '0 auto 12px' }} />
-            <h3 style={{ fontSize: '1rem', marginBottom: 8 }}>No Medical History</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 16 }}>Upload a report to automatically extract your health summary.</p>
-            <Link to="/patient/reports" className="btn btn-primary btn-sm"><FiFileText /> Upload Report</Link>
+          <div className="card text-center py-10 px-6 bg-slate-50/50 border-dashed border-slate-300 shadow-none">
+            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+               <FiActivity size={28} />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">No Medical History</h3>
+            <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Upload a report to automatically extract your health summary.</p>
+            <Link to="/patient/reports" className="btn btn-primary"><FiFileText /> Upload Report</Link>
           </div>
         )}
       </div>
 
       {/* Middle: Quick Actions */}
-      <div style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 16 }}>Quick Actions</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
-          <DashboardAction icon={<FiMaximize />} title="Emergency QR" link="/patient/qr" color="#3b82f6" />
-          <DashboardAction icon={<FiClock />} title="Timeline" link="/patient/timeline" color="#8b5cf6" />
-          <DashboardAction icon={<FiCamera />} title="Scan Rx" link="/patient/prescriptions" color="#10b981" />
-          <DashboardAction icon={<FiBell />} title="Reminders" link="/patient/reminders" color="#f59e0b" />
-          <DashboardAction icon={<FiShield />} title="Access" link="/patient/access" color="#64748b" />
-          <DashboardAction icon={<FiUser />} title="Profile" link="/patient/profile" color="#ec4899" />
+      <div className="mb-10">
+        <h2 className="text-lg font-semibold text-slate-800 tracking-tight mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+          <DashboardAction icon={<FiMaximize />} title="Emergency QR" link="/patient/qr" color="text-blue-600" bg="bg-blue-50" border="hover:border-blue-300" />
+          <DashboardAction icon={<FiClock />} title="Timeline" link="/patient/timeline" color="text-purple-600" bg="bg-purple-50" border="hover:border-purple-300" />
+          <DashboardAction icon={<FiCamera />} title="Scan Rx" link="/patient/prescriptions" color="text-emerald-600" bg="bg-emerald-50" border="hover:border-emerald-300" />
+          <DashboardAction icon={<FiBell />} title="Reminders" link="/patient/reminders" color="text-amber-500" bg="bg-amber-50" border="hover:border-amber-300" />
+          <DashboardAction icon={<FiShield />} title="Access" link="/patient/access" color="text-indigo-600" bg="bg-indigo-50" border="hover:border-indigo-300" />
+          <DashboardAction icon={<FiUser />} title="Profile" link="/patient/profile" color="text-pink-600" bg="bg-pink-50" border="hover:border-pink-300" />
         </div>
       </div>
 
       {/* Bottom: Recent Reports */}
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Recent Reports</h2>
-          <Link to="/patient/reports" className="btn btn-ghost btn-sm" style={{ color: 'var(--primary)' }}>View All ({reportCount})</Link>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-slate-800 tracking-tight">Recent Reports</h2>
+          <Link to="/patient/reports" className="btn btn-ghost btn-sm text-blue-600">View All ({reportCount})</Link>
         </div>
 
         {recentReports.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="flex flex-col gap-3">
             {recentReports.map(report => (
-              <div key={report.id} className="card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 16, marginBottom: 0 }}>
-                <div style={{ background: 'var(--bg-primary)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
-                  <FiFileText style={{ color: 'var(--primary)', fontSize: '1.2rem' }} />
+              <div key={report.id} className="card p-4 flex items-center gap-4 mb-0 hover:bg-slate-50 transition-colors cursor-pointer border-slate-200">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+                  <FiFileText className="text-blue-600 text-xl" />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 4 }}>{report.title}</h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    {new Date(report.uploaded_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} • {report.report_type}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-semibold text-slate-900 truncate mb-1">{report.title}</h4>
+                  <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                    <span>{new Date(report.uploaded_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                    <span className="capitalize">{report.report_type.replace('_', ' ')}</span>
                   </p>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="card text-center" style={{ padding: '32px 20px', background: 'transparent', borderStyle: 'dashed' }}>
-             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>No reports uploaded yet.</p>
+          <div className="card text-center py-8 bg-transparent border-dashed border-slate-300 shadow-none">
+             <p className="text-sm text-slate-500">No reports uploaded yet.</p>
           </div>
         )}
       </div>
@@ -156,20 +163,14 @@ export default function PatientHome() {
   );
 }
 
-function DashboardAction({ icon, title, link, color }) {
+function DashboardAction({ icon, title, link, color, bg, border }) {
   return (
-    <Link to={link} style={{ textDecoration: 'none' }}>
-      <div className="card" style={{ padding: '16px', textAlign: 'center', height: '100%', marginBottom: 0, transition: 'var(--transition)' }} 
-           onMouseOver={e => e.currentTarget.style.borderColor = color}
-           onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}>
-        <div style={{ 
-          width: 40, height: 40, margin: '0 auto 12px', borderRadius: '10px',
-          background: `${color}15`, color: color,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem'
-        }}>
+    <Link to={link} className="block outline-none group">
+      <div className={`card p-4 text-center h-full mb-0 transition-all duration-200 ${border} group-hover:shadow-md flex flex-col items-center justify-center`}>
+        <div className={`w-10 h-10 mb-3 rounded-xl flex items-center justify-center text-xl ${bg} ${color}`}>
           {icon}
         </div>
-        <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-primary)' }}>{title}</div>
+        <div className="text-xs font-semibold text-slate-700 tracking-tight">{title}</div>
       </div>
     </Link>
   );

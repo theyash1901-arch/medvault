@@ -12,6 +12,12 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
+      const storedUser = localStorage.getItem('mock_user');
+      const storedProfile = localStorage.getItem('mock_profile');
+      if (storedUser && storedProfile) {
+        setUser(JSON.parse(storedUser));
+        setProfile(JSON.parse(storedProfile));
+      }
       setLoading(false);
       return;
     }
@@ -77,22 +83,37 @@ export function AuthProvider({ children }) {
 
   const signUp = async (email, password) => {
     if (!isSupabaseConfigured) {
-      return { data: { user: { id: 'demo-' + Date.now(), email } }, error: null };
+      const mockUser = { id: 'demo-' + Date.now(), email };
+      const mockProfile = { id: mockUser.id, role: 'patient', full_name: 'Demo User', blood_group: 'O+' };
+      setUser(mockUser);
+      setProfile(mockProfile);
+      localStorage.setItem('mock_user', JSON.stringify(mockUser));
+      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
+      return { data: { user: mockUser }, error: null };
     }
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
       return { data, error: null };
     } catch (err) {
-      return { data: { user: { id: 'demo-' + Date.now(), email } }, error: null };
+      const mockUser = { id: 'demo-' + Date.now(), email };
+      const mockProfile = { id: mockUser.id, role: 'patient', full_name: 'Demo User', blood_group: 'O+' };
+      setUser(mockUser);
+      setProfile(mockProfile);
+      localStorage.setItem('mock_user', JSON.stringify(mockUser));
+      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
+      return { data: { user: mockUser }, error: null };
     }
   };
 
   const signIn = async (email, password) => {
     if (!isSupabaseConfigured) {
       const mockUser = { id: 'demo-' + Date.now(), email };
+      const mockProfile = { id: mockUser.id, role: 'patient', full_name: 'Demo User', blood_group: 'O+' };
       setUser(mockUser);
-      setProfile({ id: mockUser.id, role: 'patient', full_name: 'Demo User', blood_group: 'O+' });
+      setProfile(mockProfile);
+      localStorage.setItem('mock_user', JSON.stringify(mockUser));
+      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
       return { data: { user: mockUser }, error: null };
     }
     try {
@@ -102,8 +123,11 @@ export function AuthProvider({ children }) {
     } catch (err) {
       console.warn('Login failed, using offline fallback');
       const mockUser = { id: 'demo-' + Date.now(), email };
+      const mockProfile = { id: mockUser.id, role: 'patient', full_name: 'Demo User', blood_group: 'O+' };
       setUser(mockUser);
-      setProfile({ id: mockUser.id, role: 'patient', full_name: 'Demo User', blood_group: 'O+' });
+      setProfile(mockProfile);
+      localStorage.setItem('mock_user', JSON.stringify(mockUser));
+      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
       return { data: { user: mockUser }, error: null };
     }
   };
@@ -116,6 +140,8 @@ export function AuthProvider({ children }) {
     } catch (err) {
       console.error(err);
     }
+    localStorage.removeItem('mock_user');
+    localStorage.removeItem('mock_profile');
     setUser(null);
     setProfile(null);
     return { error: null };

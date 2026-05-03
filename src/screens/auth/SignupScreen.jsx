@@ -47,9 +47,7 @@ export default function SignupScreen() {
     setError('');
     setLoading(true);
     const { error: authError } = await signInWithApple();
-    if (authError) {
-        setError(authError.message);
-    }
+    if (authError) setError(authError.message);
     setLoading(false);
   };
 
@@ -57,104 +55,86 @@ export default function SignupScreen() {
     setError('');
     setLoading(true);
     const { error: authError } = await signInWithGoogle();
-    if (authError) {
-        setError(authError.message);
-    }
+    if (authError) setError(authError.message);
     setLoading(false);
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-logo">
-          <div className="logo-icon">
+    <div className="auth-page flex items-center justify-center min-h-screen p-5 bg-slate-50">
+      <div className="auth-card bg-white border border-slate-200 rounded-2xl p-8 w-full max-w-md shadow-sm">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-xl mb-4 text-2xl shadow-sm">
             <FiShield />
           </div>
-          <h1>MedVault</h1>
-          <p>Create your secure health account</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">MedVault</h1>
+          <p className="text-slate-500 mt-1">Create your secure health account</p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {error && (
             <div className="alert alert-error">
-              <FiAlertCircle />
-              {error}
+              <FiAlertCircle className="shrink-0" />
+              <span>{error}</span>
             </div>
           )}
           {success && (
             <div className="alert alert-success">
-              <FiCheckCircle />
-              {success}
+              <FiCheckCircle className="shrink-0" />
+              <span>{success}</span>
             </div>
           )}
 
-          <div className="form-group">
+          <div className="form-group mb-0">
             <label className="form-label">Email</label>
-            <div style={{ position: 'relative' }}>
-              <FiMail style={{
-                position: 'absolute', left: 14, top: '50%',
-                transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '1rem'
-              }} />
+            <div className="relative">
+              <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base" />
               <input
                 id="signup-email"
                 type="email"
-                className="form-input"
+                className="form-input pl-10"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                style={{ paddingLeft: 42 }}
               />
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group mb-0">
             <label className="form-label">Password</label>
-            <div style={{ position: 'relative' }}>
-              <FiLock style={{
-                position: 'absolute', left: 14, top: '50%',
-                transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '1rem'
-              }} />
+            <div className="relative">
+              <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base" />
               <input
                 id="signup-password"
                 type={showPassword ? 'text' : 'password'}
-                className="form-input"
+                className="form-input pl-10 pr-10"
                 placeholder="Min 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{ paddingLeft: 42, paddingRight: 42 }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute', right: 14, top: '50%',
-                  transform: 'translateY(-50%)', background: 'none', border: 'none',
-                  color: 'var(--text-muted)', cursor: 'pointer', padding: 0
-                }}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
               >
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group mb-0">
             <label className="form-label">Confirm Password</label>
-            <div style={{ position: 'relative' }}>
-              <FiLock style={{
-                position: 'absolute', left: 14, top: '50%',
-                transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '1rem'
-              }} />
+            <div className="relative">
+              <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base" />
               <input
                 id="signup-confirm-password"
                 type={showPassword ? 'text' : 'password'}
-                className="form-input"
+                className="form-input pl-10"
                 placeholder="Repeat password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                style={{ paddingLeft: 42 }}
               />
             </div>
           </div>
@@ -162,36 +142,34 @@ export default function SignupScreen() {
           <button
             id="signup-submit"
             type="submit"
-            className="btn btn-primary btn-full btn-lg"
+            className="btn btn-primary w-full py-3 mt-2 text-base"
             disabled={loading}
           >
-            {loading ? <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span> : 'Create Account'}
+            {loading ? <span className="spinner w-5 h-5 border-2"></span> : 'Create Account'}
           </button>
         </form>
 
-        <div style={{ marginTop: 20, textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', margin: '16px 0' }}>
-            <div style={{ flex: 1, height: 1, backgroundColor: 'var(--border)' }}></div>
-            <span style={{ padding: '0 10px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>OR</span>
-            <div style={{ flex: 1, height: 1, backgroundColor: 'var(--border)' }}></div>
+        <div className="mt-8 text-center">
+          <div className="flex items-center my-6">
+            <div className="flex-1 h-px bg-slate-200"></div>
+            <span className="px-3 text-xs font-medium text-slate-400 uppercase">OR</span>
+            <div className="flex-1 h-px bg-slate-200"></div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="flex flex-col gap-3">
             <button
               type="button"
-              className="btn btn-outline btn-full btn-lg"
               onClick={handleGoogleLogin}
               disabled={loading}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#fff', color: '#000', border: '1px solid #ddd' }}
+              className="btn btn-outline w-full py-2.5 flex items-center justify-center gap-3 bg-white text-slate-700 border-slate-300 hover:bg-slate-50 font-medium"
             >
               <FcGoogle size={20} />
               Continue with Google
             </button>
             <button
               type="button"
-              className="btn btn-outline btn-full btn-lg"
               onClick={handleAppleLogin}
               disabled={loading}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#000', color: '#fff', border: '1px solid #333' }}
+              className="btn w-full py-2.5 flex items-center justify-center gap-3 bg-black text-white hover:bg-slate-800 font-medium"
             >
               <FaApple size={20} />
               Continue with Apple
@@ -199,8 +177,8 @@ export default function SignupScreen() {
           </div>
         </div>
 
-        <p className="auth-footer">
-          Already have an account? <Link to="/login">Sign in</Link>
+        <p className="mt-8 text-center text-sm text-slate-600">
+          Already have an account? <Link to="/login" className="font-semibold text-blue-600 hover:underline">Sign in</Link>
         </p>
       </div>
     </div>
